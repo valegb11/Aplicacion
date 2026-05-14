@@ -1827,6 +1827,16 @@ function selectGrade(g){
   state.grade = g;
   saveState();
   renderHome();
+  // Scroll suave al mapa de lecciones tras cambiar de grado
+  requestAnimationFrame(()=>{
+    const map = document.getElementById('days-map');
+    if(map){
+      const topbar = document.querySelector('.topbar');
+      const offset = topbar ? topbar.offsetHeight + 12 : 12;
+      const y = map.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  });
 }
 
 function updateStreak(){
