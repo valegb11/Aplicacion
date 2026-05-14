@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChemQuest — Química Inorgánica</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070b14;
+  --bg2: #0d1220;
+  --card: #111827;
+  --card2: #162033;
+  --border: #1e2d47;
+  --border2: #243654;
+  --blue: #3b82f6;
+  --cyan: #22d3ee;
+  --green: #4ade80;
+  --yellow: #fbbf24;
+  --orange: #fb923c;
+  --pink: #f472b6;
+  --purple: #a78bfa;
+  --red: #f87171;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --dim: #94a3b8;
+  --font-game: 'Orbitron', monospace;
+  --font-body: 'Nunito', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── STARFIELD ── */
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d) ease-in-out infinite alternate}
+@keyframes twinkle{0%{opacity:.1;transform:scale(1)}100%{opacity:.7;transform:scale(1.4)}}
+
+/* ── PARTICLES ── */
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.particle{
+  position:absolute;
+  font-size:1.2rem;
+  animation:floatUp 4s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes floatUp{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  100%{opacity:0;transform:translateY(-120px) scale(0.5)}
+}
+
+/* ── SCREEN SYSTEM ── */
+.screen{display:none;position:relative;z-index:1}
+.screen.active{display:block}
+
+/* ════════════════════════════════
+   HOME SCREEN
+════════════════════════════════ */
+#screen-home{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+.home-header{
+  background:rgba(13,18,32,0.9);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:1rem 2rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+.logo{
+  font-family:var(--font-game);
+  font-size:1.3rem;
+  color:var(--cyan);
+  letter-spacing:.05em;
+  display:flex;align-items:center;gap:.5rem;
+}
+.logo-sub{font-size:.6rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-top:.1rem}
+
+.stats-bar{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+.stat-chip{
+  display:flex;align-items:center;gap:.4rem;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:.35rem .85rem;
+  font-size:.8rem;font-weight:700;
+  transition:all .2s;
+}
+.stat-chip .icon{font-size:1rem}
+.stat-chip.xp .icon{color:var(--yellow)}
+.stat-chip.streak .icon{color:var(--orange)}
+.stat-chip.level .icon{color:var(--cyan)}
+
+.home-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:2rem;max-width:900px;margin:0 auto;width:100%}
+
+/* Grade selector */
+.grade-selector{
+  display:flex;gap:1rem;margin:2rem 0;
+}
+.grade-btn{
+  flex:1;max-width:220px;
+  background:var(--card);
+  border:2px solid var(--border);
+  border-radius:20px;
+  padding:1.5rem;
+  cursor:pointer;
+  transition:all .3s;
+  text-align:center;
+  font-family:var(--font-body);
+  position:relative;overflow:hidden;
+}
+.grade-btn::before{
+  content:'';
+  position:absolute;inset:0;
+  background:var(--gb-color);
+  opacity:0;
+  transition:opacity .3s;
+}
+.grade-btn:hover::before,.grade-btn.active::before{opacity:.08}
+.grade-btn.active{border-color:var(--gb-color);box-shadow:0 0 30px rgba(0,0,0,.5),inset 0 0 30px var(--gb-color-alpha)}
+.grade-btn .gb-icon{font-size:2.5rem;margin-bottom:.5rem}
+.grade-btn .gb-label{font-family:var(--font-game);font-size:.75rem;color:var(--gb-color);letter-spacing:.1em}
+.grade-btn .gb-title{font-size:1rem;font-weight:800;margin:.3rem 0}
+.grade-btn .gb-sub{font-size:.75rem;color:var(--muted)}
+
+/* Day map */
+.map-title{
+  font-family:var(--font-game);
+  font-size:.7rem;
+  letter-spacing:.2em;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin:2rem 0 1.25rem;
+  align-self:flex-start;
+}
+.days-map{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(130px,1fr));
+  gap:1rem;
+  width:100%;
+}
+.day-node{
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:18px;
+  padding:1.25rem 1rem;
+  cursor:pointer;
+  transition:all .3s;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.day-node::after{
+  content:'';
+  position:absolute;bottom:0;left:0;right:0;
+  height:3px;
+  background:var(--node-color);
+  transform:scaleX(0);
+  transition:transform .3s;
+}
+.day-node:hover::after,.day-node.completed::after{transform:scaleX(1)}
+.day-node.locked{opacity:.4;cursor:not-allowed;filter:grayscale(1)}
+.day-node.completed{border-color:var(--node-color);background:rgba(0,0,0,.1)}
+.day-node.today{border-color:var(--cyan);animation:todayPulse 2s ease-in-out infinite}
+@keyframes todayPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(34,211,238,.3)}
+  50%{box-shadow:0 0 0 8px rgba(34,211,238,0)}
+}
+.node-day{font-family:var(--font-game);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.node-icon{font-size:1.8rem;margin:.4rem 0}
+.node-title{font-size:.8rem;font-weight:800;line-height:1.3}
+.node-stars{font-size:.9rem;letter-spacing:.1rem;margin-top:.4rem;height:1.1rem}
+.node-badge{
+  position:absolute;top:.5rem;right:.5rem;
+  background:var(--green);
+  color:#000;
+  font-size:.6rem;font-weight:800;
+  border-radius:10px;padding:.15rem .4rem;
+  font-family:var(--font-game);
+}
+/* incomplete node — done but < 3 stars */
+.day-node.incomplete{
+  border-color:rgba(251,146,60,.5)!important;
+}
+.day-node.incomplete::before{
+  content:'';
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    -45deg,
+    transparent,transparent 6px,
+    rgba(251,146,60,.04) 6px,rgba(251,146,60,.04) 12px
+  );
+  border-radius:18px;
+  pointer-events:none;
+}
+.node-badge.incomplete-badge{
+  background:var(--orange);
+  color:#000;
+}
+/* XP penalty chip on results */
+.xp-penalty-box{
+  background:rgba(248,113,113,.08);
+  border:1px solid rgba(248,113,113,.3);
+  border-radius:14px;
+  padding:1rem 1.25rem;
+  margin:1rem 0;
+  display:flex;align-items:flex-start;gap:.75rem;
+  text-align:left;
+}
+.xp-penalty-icon{font-size:1.6rem}
+.xp-penalty-title{font-family:var(--font-game);font-size:.7rem;color:var(--red);letter-spacing:.1em;margin-bottom:.3rem}
+.xp-penalty-text{font-size:.82rem;color:var(--dim);line-height:1.6}
+.xp-penalty-num{font-family:var(--font-game);font-size:1.1rem;color:var(--red);font-weight:900}
+/* recovery banner */
+.recovery-box{
+  background:rgba(74,222,128,.07);
+  border:1px solid rgba(74,222,128,.25);
+  border-radius:14px;
+  padding:1rem 1.25rem;
+  margin:1rem 0;
+  display:flex;align-items:flex-start;gap:.75rem;
+  text-align:left;
+}
+.recovery-title{font-family:var(--font-game);font-size:.7rem;color:var(--green);letter-spacing:.1em;margin-bottom:.3rem}
+.recovery-text{font-size:.82rem;color:var(--dim);line-height:1.6}
+.recovery-num{font-family:var(--font-game);font-size:1rem;color:var(--green);font-weight:900}
+/* stars breakdown row */
+.stars-breakdown{
+  display:flex;justify-content:center;gap:.5rem;margin:.75rem 0;flex-wrap:wrap;
+}
+.star-item{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;padding:.4rem .8rem;
+  font-size:.75rem;color:var(--muted);
+  display:flex;align-items:center;gap:.4rem;
+}
+.star-item.earned{color:var(--yellow);border-color:rgba(251,191,36,.3)}
+
+/* XP bar */
+.xp-bar-wrap{
+  width:100%;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:50px;
+  padding:.5rem 1.25rem;
+  display:flex;align-items:center;gap:1rem;
+  margin-top:2rem;
+}
+.xp-bar-track{
+  flex:1;height:10px;
+  background:var(--bg2);
+  border-radius:10px;overflow:hidden;
+}
+.xp-bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--blue),var(--cyan));
+  border-radius:10px;
+  transition:width 1s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.xp-bar-fill::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+  animation:shimmer 2s infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.xp-bar-label{font-size:.75rem;font-weight:800;color:var(--yellow);font-family:var(--font-game);white-space:nowrap}
+
+/* Achievements strip */
+.ach-strip{
+  display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem;width:100%;
+}
+.ach-badge{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:.6rem .9rem;
+  display:flex;align-items:center;gap:.5rem;
+  font-size:.78rem;font-weight:700;
+  transition:all .2s;
+}
+.ach-badge.unlocked{border-color:var(--yellow);color:var(--yellow)}
+.ach-badge.locked{opacity:.3;filter:grayscale(1)}
+.ach-badge .ai{font-size:1.1rem}
+
+/* ════════════════════════════════
+   LESSON SCREEN
+════════════════════════════════ */
+#screen-lesson{min-height:100vh;padding:0}
+.lesson-topbar{
+  background:rgba(13,18,32,0.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:.75rem 2rem;
+  display:flex;align-items:center;gap:1rem;
+  position:sticky;top:0;z-index:50;
+}
+.back-btn{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--dim);
+  font-size:.85rem;
+  padding:.4rem .9rem;
+  cursor:pointer;
+  font-family:var(--font-body);
+  transition:all .2s;
+}
+.back-btn:hover{color:var(--text);border-color:var(--dim)}
+.lesson-progress-wrap{flex:1}
+.lesson-progress-label{font-family:var(--font-game);font-size:.6rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.3rem}
+.lesson-prog-track{height:8px;background:var(--card2);border-radius:8px;overflow:hidden}
+.lesson-prog-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .5s ease}
+.lesson-hearts{display:flex;gap:.2rem;font-size:1.1rem}
+
+.lesson-content{
+  max-width:720px;
+  margin:0 auto;
+  padding:2rem;
+}
+
+/* SLIDE card */
+.slide-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:2rem;
+  animation:slideIn .4s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideIn{
+  from{opacity:0;transform:translateX(30px)}
+  to{opacity:1;transform:translateX(0)}
+}
+.slide-eyebrow{
+  font-family:var(--font-game);
+  font-size:.6rem;letter-spacing:.2em;
+  color:var(--cyan);text-transform:uppercase;margin-bottom:1rem;
+}
+.slide-title{
+  font-family:var(--font-game);
+  font-size:1.4rem;font-weight:700;
+  margin-bottom:1.25rem;
+  line-height:1.3;
+}
+.slide-visual{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.5rem;
+  margin:1.25rem 0;
+  display:flex;align-items:center;justify-content:center;
+  min-height:120px;
+  font-size:3rem;
+  flex-wrap:wrap;gap:1rem;
+}
+.slide-text{
+  font-size:1.05rem;
+  line-height:1.8;
+  color:var(--dim);
+}
+.slide-text strong{color:var(--text);}
+.highlight-box{
+  background:linear-gradient(135deg,rgba(34,211,238,.05),rgba(59,130,246,.05));
+  border:1px solid rgba(34,211,238,.2);
+  border-radius:14px;
+  padding:1rem 1.25rem;
+  margin:1.25rem 0;
+  font-size:.92rem;
+  color:var(--dim);
+  line-height:1.7;
+}
+.highlight-box .hb-icon{font-size:1.2rem;margin-right:.5rem}
+.formula-row{
+  display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0;
+}
+.f-chip{
+  background:var(--bg);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:.4rem .9rem;
+  font-family:var(--font-game);
+  font-size:.8rem;
+  color:var(--cyan);
+  transition:all .2s;
+}
+.f-chip:hover{border-color:var(--cyan);box-shadow:0 0 10px rgba(34,211,238,.2)}
+
+/* NEXT button */
+.next-btn{
+  width:100%;
+  padding:1rem;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  border:none;border-radius:16px;
+  color:white;font-family:var(--font-game);font-size:.85rem;font-weight:700;
+  cursor:pointer;margin-top:1.5rem;
+  letter-spacing:.1em;
+  transition:all .3s;
+  position:relative;overflow:hidden;
+}
+.next-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.1),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.next-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(59,130,246,.4)}
+.next-btn:hover::before{opacity:1}
+.next-btn:active{transform:translateY(0)}
+
+/* ════════════════════════════════
+   QUIZ SCREEN
+════════════════════════════════ */
+#screen-quiz{min-height:100vh;padding:0}
+.quiz-topbar{
+  background:rgba(13,18,32,0.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:.75rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;
+  position:sticky;top:0;z-index:50;
+}
+.quiz-counter{
+  font-family:var(--font-game);
+  font-size:.75rem;color:var(--muted);letter-spacing:.1em;
+}
+.quiz-hearts-bar{display:flex;gap:.2rem;font-size:1.3rem}
+.timer-ring{
+  position:relative;width:44px;height:44px;
+}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-ring circle{
+  fill:none;stroke-width:4;
+  stroke-linecap:round;
+  transition:stroke-dashoffset .1s linear;
+}
+.timer-ring .bg{stroke:var(--border2)}
+.timer-ring .fg{stroke:var(--cyan);stroke-dasharray:113;stroke-dashoffset:0}
+.timer-ring .num{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-game);font-size:.7rem;font-weight:700;
+  color:var(--cyan);
+}
+
+.quiz-body{max-width:680px;margin:0 auto;padding:2rem}
+
+.question-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:2rem;
+  animation:slideIn .35s ease;
+}
+.q-number{
+  font-family:var(--font-game);
+  font-size:.6rem;letter-spacing:.2em;
+  color:var(--purple);text-transform:uppercase;margin-bottom:.75rem;
+}
+.q-text{
+  font-size:1.15rem;font-weight:800;
+  line-height:1.5;margin-bottom:1.75rem;
+}
+.q-visual{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:1rem;
+  margin-bottom:1.5rem;
+  font-family:var(--font-game);
+  font-size:1rem;
+  text-align:center;
+  color:var(--cyan);
+}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.opt-btn{
+  background:var(--card2);
+  border:1.5px solid var(--border);
+  border-radius:16px;
+  padding:1rem 1.25rem;
+  text-align:left;
+  font-family:var(--font-body);
+  font-size:.9rem;font-weight:700;
+  color:var(--dim);
+  cursor:pointer;
+  transition:all .25s;
+  display:flex;align-items:center;gap:.75rem;
+  position:relative;overflow:hidden;
+}
+.opt-btn::before{
+  content:'';position:absolute;inset:0;
+  background:var(--opt-hover,rgba(59,130,246,.05));
+  opacity:0;transition:opacity .2s;
+}
+.opt-btn:hover:not(:disabled)::before{opacity:1}
+.opt-btn:hover:not(:disabled){border-color:var(--blue);color:var(--text);transform:translateY(-1px)}
+.opt-letter{
+  width:28px;height:28px;min-width:28px;
+  border-radius:8px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-game);font-size:.65rem;font-weight:700;
+  transition:all .2s;
+}
+.opt-btn.correct{border-color:var(--green)!important;background:rgba(74,222,128,.08)!important;color:var(--green)!important}
+.opt-btn.correct .opt-letter{background:var(--green);color:#000;border-color:var(--green)}
+.opt-btn.wrong{border-color:var(--red)!important;background:rgba(248,113,113,.08)!important;color:var(--red)!important}
+.opt-btn.wrong .opt-letter{background:var(--red);color:#000;border-color:var(--red)}
+.opt-btn:disabled{cursor:not-allowed}
+
+.feedback-bar{
+  margin-top:1rem;
+  padding:1rem 1.25rem;
+  border-radius:14px;
+  font-size:.9rem;font-weight:700;
+  display:none;
+  animation:fadeUp .3s ease;
+}
+.feedback-bar.show{display:block}
+.feedback-bar.ok{background:rgba(74,222,128,.1);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.feedback-bar.bad{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.continue-btn{
+  width:100%;margin-top:1.25rem;
+  padding:.9rem;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  border:none;border-radius:14px;
+  color:white;font-family:var(--font-game);font-size:.8rem;font-weight:700;
+  cursor:pointer;letter-spacing:.1em;
+  transition:all .3s;display:none;
+}
+.continue-btn.show{display:block;animation:fadeUp .3s ease}
+.continue-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(139,92,250,.4)}
+
+/* ════════════════════════════════
+   RESULTS SCREEN
+════════════════════════════════ */
+#screen-results{
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:2rem;
+}
+.results-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:2.5rem;
+  max-width:560px;width:100%;
+  text-align:center;
+  animation:popIn .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.result-trophy{font-size:4.5rem;margin-bottom:1rem;animation:bounce 1s ease .3s both}
+@keyframes bounce{0%{transform:scale(0) rotate(-20deg)}60%{transform:scale(1.15) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.result-grade{
+  font-family:var(--font-game);
+  font-size:.7rem;letter-spacing:.2em;
+  color:var(--muted);text-transform:uppercase;margin-bottom:.5rem;
+}
+.result-title{
+  font-family:var(--font-game);
+  font-size:1.8rem;margin-bottom:.5rem;
+  background:linear-gradient(135deg,var(--yellow),var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.result-subtitle{color:var(--dim);font-size:.95rem;margin-bottom:2rem}
+.score-display{
+  display:flex;justify-content:center;gap:1.5rem;margin:1.5rem 0;flex-wrap:wrap;
+}
+.score-item{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1rem 1.5rem;
+  min-width:100px;
+}
+.score-val{font-family:var(--font-game);font-size:2rem;font-weight:900}
+.score-val.xp{color:var(--yellow)}
+.score-val.hits{color:var(--green)}
+.score-val.time{color:var(--cyan)}
+.score-lbl{font-size:.7rem;color:var(--muted);margin-top:.2rem;text-transform:uppercase;letter-spacing:.1em}
+.stars-display{font-size:2.5rem;letter-spacing:.2rem;margin:1rem 0}
+.q-review{
+  text-align:left;margin:1.5rem 0;
+  display:flex;flex-direction:column;gap:.5rem;
+}
+.q-review-item{
+  display:flex;align-items:center;gap:.75rem;
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:.65rem 1rem;font-size:.82rem;
+}
+.q-review-item.correct{border-color:rgba(74,222,128,.3)}
+.q-review-item.wrong{border-color:rgba(248,113,113,.3)}
+.q-review-dot{width:10px;height:10px;border-radius:50%;min-width:10px}
+.q-review-item.correct .q-review-dot{background:var(--green)}
+.q-review-item.wrong .q-review-dot{background:var(--red)}
+.q-review-text{flex:1;color:var(--dim)}
+.q-review-mark{font-size:1rem}
+
+.history-title{
+  font-family:var(--font-game);
+  font-size:.65rem;letter-spacing:.15em;
+  color:var(--muted);text-transform:uppercase;
+  margin:1.5rem 0 .75rem;text-align:left;
+}
+.history-list{
+  display:flex;flex-direction:column;gap:.4rem;
+}
+.history-item{
+  display:flex;align-items:center;gap:.75rem;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:.5rem .9rem;
+  font-size:.78rem;
+  color:var(--muted);
+}
+.history-date{font-family:var(--font-game);font-size:.6rem}
+.history-stars{letter-spacing:.05rem}
+.history-xp{color:var(--yellow);font-weight:700;margin-left:auto}
+
+.action-btns{display:flex;gap:.75rem;margin-top:1.5rem;flex-wrap:wrap}
+.action-btn{
+  flex:1;min-width:130px;
+  padding:.85rem;
+  border:none;border-radius:14px;
+  font-family:var(--font-game);font-size:.72rem;font-weight:700;
+  cursor:pointer;letter-spacing:.08em;
+  transition:all .25s;
+}
+.action-btn.primary{
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  color:white;
+}
+.action-btn.primary:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(34,211,238,.3)}
+.action-btn.secondary{
+  background:var(--card2);
+  border:1px solid var(--border);
+  color:var(--dim);
+}
+.action-btn.secondary:hover{border-color:var(--dim);color:var(--text)}
+
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 10px rgba(74,222,128,.4)}
+  50%{box-shadow:0 0 28px rgba(74,222,128,.8),0 0 50px rgba(34,211,238,.3)}
+}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:.75rem 1.5rem;
+  font-size:.88rem;font-weight:700;
+  z-index:999;
+  opacity:0;transition:all .3s;
+  pointer-events:none;
+  white-space:nowrap;
+  display:flex;align-items:center;gap:.5rem;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── LEVEL UP OVERLAY ── */
+.levelup-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.85);
+  z-index:500;
+  display:none;
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:1rem;
+  animation:fadeIn .3s ease;
+}
+.levelup-overlay.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.levelup-text{
+  font-family:var(--font-game);
+  font-size:3rem;font-weight:900;
+  background:linear-gradient(135deg,var(--yellow),var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:levelBounce .6s cubic-bezier(.34,1.56,.64,1) .2s both;
+}
+@keyframes levelBounce{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.levelup-sub{color:var(--dim);font-size:1rem;font-family:var(--font-game);letter-spacing:.1em}
+.levelup-close{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:.6rem 1.5rem;
+  color:var(--text);font-family:var(--font-game);font-size:.7rem;
+  cursor:pointer;margin-top:1rem;
+  transition:all .2s;
+}
+.levelup-close:hover{border-color:var(--yellow)}
+
+/* ── SLIDE IMAGE ── */
+.slide-img-wrap{
+  border-radius:16px;overflow:hidden;
+  border:1px solid var(--border);
+  margin:1.25rem 0;background:var(--bg2);
+}
+.slide-img-wrap svg{width:100%;height:auto;display:block}
+.slide-img-caption{
+  font-size:.72rem;color:var(--muted);
+  text-align:center;padding:.5rem;
+  font-family:var(--font-game);letter-spacing:.08em;
+  border-top:1px solid var(--border);
+}
+
+/* ── PERIODIC TABLE ── */
+.pt-screen{max-width:1100px;margin:0 auto;padding:1.5rem}
+.pt-title{font-family:var(--font-game);font-size:.65rem;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase;margin-bottom:1rem}
+.pt-legend{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.pt-leg-item{display:flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--dim)}
+.pt-leg-dot{width:10px;height:10px;border-radius:3px}
+.pt-grid{display:grid;grid-template-columns:repeat(18,1fr);gap:2px;margin-bottom:1.5rem}
+.pt-cell{
+  aspect-ratio:1;border-radius:5px;border:1px solid transparent;
+  cursor:pointer;transition:all .18s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;min-width:0;
+}
+.pt-cell:hover:not(.empty){transform:scale(1.25);z-index:10;box-shadow:0 4px 20px rgba(0,0,0,.6)}
+.pt-cell.empty{background:transparent!important;border-color:transparent!important;cursor:default}
+.pt-cell .pt-num{font-size:.45rem;color:rgba(255,255,255,.4);line-height:1;font-family:var(--font-game)}
+.pt-cell .pt-sym{font-family:var(--font-game);font-weight:700;line-height:1;font-size:clamp(.45rem,.9vw,.8rem)}
+.pt-cell .pt-name{font-size:.3rem;color:rgba(255,255,255,.5);line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.pt-cell.selected{outline:2px solid var(--yellow);transform:scale(1.2);z-index:10}
+.pt-cell.challenge-target{animation:targetPulse 1.2s ease-in-out infinite}
+@keyframes targetPulse{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,.6)}50%{box-shadow:0 0 0 6px rgba(251,191,36,0)}}
+.pt-cell.correct-pick{outline:2.5px solid var(--green)!important;animation:none}
+.pt-cell.wrong-pick{outline:2.5px solid var(--red)!important;animation:none}
+.elem-panel{
+  background:var(--card2);border:1px solid var(--border2);border-radius:18px;
+  padding:1.25rem 1.5rem;display:grid;grid-template-columns:auto 1fr;
+  gap:1.25rem;align-items:start;margin-top:1rem;animation:fadeUp .3s ease;
+}
+.elem-big{width:80px;height:80px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem}
+.elem-big .num{font-family:var(--font-game);font-size:.65rem;color:rgba(255,255,255,.6)}
+.elem-big .sym{font-family:var(--font-game);font-size:2rem;font-weight:900;line-height:1}
+.elem-big .nm{font-size:.6rem;color:rgba(255,255,255,.7);font-weight:700}
+.elem-big .mass{font-size:.55rem;color:rgba(255,255,255,.5)}
+.elem-info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem}
+.elem-info-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.5rem .75rem}
+.elem-info-label{font-family:var(--font-game);font-size:.55rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.elem-info-val{font-size:.88rem;font-weight:700;color:var(--text);margin-top:.2rem}
+.pt-challenge{
+  background:linear-gradient(135deg,rgba(139,92,246,.07),rgba(59,130,246,.07));
+  border:1px solid rgba(139,92,246,.3);border-radius:18px;padding:1.25rem 1.5rem;margin-top:1rem;
+}
+.pt-challenge-title{font-family:var(--font-game);font-size:.65rem;letter-spacing:.15em;color:var(--purple);text-transform:uppercase;margin-bottom:.75rem}
+.config-display{
+  background:var(--bg);border:1px solid var(--border2);border-radius:12px;
+  padding:.75rem 1.1rem;font-family:var(--font-game);font-size:.95rem;
+  color:var(--cyan);letter-spacing:.05em;margin-bottom:1rem;text-align:center;font-weight:700;
+}
+.challenge-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem}
+.ch-input-wrap{display:flex;flex-direction:column;gap:.3rem}
+.ch-input-label{font-family:var(--font-game);font-size:.55rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.ch-select{
+  background:var(--card);border:1.5px solid var(--border2);border-radius:10px;
+  padding:.5rem .7rem;color:var(--text);font-family:var(--font-body);font-size:.82rem;
+  font-weight:700;outline:none;cursor:pointer;width:100%;transition:border-color .2s;
+}
+.ch-select:focus{border-color:var(--purple)}
+.ch-select.ok{border-color:var(--green)!important;color:var(--green)}
+.ch-select.bad{border-color:var(--red)!important;color:var(--red)}
+.ch-check-btn{
+  grid-column:1/-1;padding:.7rem;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  color:white;font-family:var(--font-game);font-size:.7rem;font-weight:700;
+  letter-spacing:.1em;cursor:pointer;transition:all .25s;
+}
+.ch-check-btn:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(139,92,246,.4)}
+.ch-result{border-radius:12px;padding:.75rem 1rem;font-size:.82rem;font-weight:700;margin-top:.5rem;display:none;animation:fadeUp .3s ease}
+.ch-result.show{display:block}
+.ch-result.ok{background:rgba(74,222,128,.1);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.ch-result.bad{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+.pt-score-bar{display:flex;align-items:center;gap:.75rem;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.6rem 1rem;margin-top:.75rem;font-size:.8rem;font-weight:700}
+.pt-score-val{font-family:var(--font-game);font-size:1.2rem;color:var(--yellow)}
+
+/* ── MISC ── */
+@media(max-width:600px){
+  .options-grid{grid-template-columns:1fr}
+  .grade-selector{flex-direction:column;align-items:center}
+  .grade-btn{max-width:100%;width:100%}
+  .home-header{flex-direction:column;align-items:flex-start}
+  .pt-grid{gap:1px}
+  .pt-cell .pt-name,.pt-cell .pt-num{display:none}
+  .elem-panel{grid-template-columns:1fr}
+  .challenge-inputs{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div id="particles"></div>
+
+<!-- ════ HOME ════ -->
+<div class="screen active" id="screen-home">
+  <div class="home-header">
+    <div>
+      <div class="logo">⚗ ChemQuest</div>
+      <div class="logo-sub">Química Inorgánica · RPG Educativo</div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-chip xp"><span class="icon">⚡</span><span id="hdr-xp">0 XP</span></div>
+      <div class="stat-chip streak"><span class="icon">🔥</span><span id="hdr-streak">0 días</span></div>
+      <div class="stat-chip level"><span class="icon">🏆</span><span id="hdr-level">Nv. 1</span></div>
+    </div>
+  </div>
+
+  <div class="home-body">
+    <!-- Grade selector -->
+    <div style="font-family:var(--font-game);font-size:.65rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:1.5rem">Selecciona tu grado</div>
+    <div class="grade-selector">
+      <button class="grade-btn active" id="btn-8" onclick="selectGrade(8)"
+        style="--gb-color:#4ade80;--gb-color-alpha:rgba(74,222,128,.06)">
+        <div class="gb-icon">🧫</div>
+        <div class="gb-label">GRADO 8</div>
+        <div class="gb-title">Fundamentos</div>
+        <div class="gb-sub">Bases de la química</div>
+      </button>
+      <button class="grade-btn" id="btn-10" onclick="selectGrade(10)"
+        style="--gb-color:#a78bfa;--gb-color-alpha:rgba(167,139,250,.06)">
+        <div class="gb-icon">⚛️</div>
+        <div class="gb-label">GRADO 10</div>
+        <div class="gb-title">Avanzado</div>
+        <div class="gb-sub">Química profunda</div>
+      </button>
+    </div>
+
+    <!-- XP Bar -->
+    <div class="xp-bar-wrap">
+      <div style="font-family:var(--font-game);font-size:.65rem;color:var(--muted);letter-spacing:.1em;white-space:nowrap">NIVEL <span id="level-num">1</span></div>
+      <div class="xp-bar-track"><div class="xp-bar-fill" id="xp-fill" style="width:0%"></div></div>
+      <div class="xp-bar-label" id="xp-label">0 / 200 XP</div>
+    </div>
+
+    <!-- Days Map -->
+    <div class="map-title">🗺 Mapa de lecciones</div>
+    <div class="days-map" id="days-map"></div>
+
+    <!-- Achievements -->
+    <div class="map-title" style="margin-top:2rem">🏅 Logros</div>
+    <div class="ach-strip" id="ach-strip"></div>
+
+    <div class="map-title" style="margin-top:2rem">🔬 Herramientas</div>
+    <button onclick="openPeriodicTable()" style="width:100%;padding:1rem 1.5rem;background:var(--card);border:1.5px solid rgba(139,92,246,.4);border-radius:18px;cursor:pointer;font-family:var(--font-body);font-weight:800;font-size:.95rem;color:var(--text);display:flex;align-items:center;gap:1rem;transition:all .25s;text-align:left;margin-bottom:2rem"
+      onmouseover="this.style.borderColor='var(--purple)';this.style.background='rgba(139,92,246,.07)'"
+      onmouseout="this.style.borderColor='rgba(139,92,246,.4)';this.style.background='var(--card)'">
+      <span style="font-size:2rem">⚗️</span>
+      <div>
+        <div style="font-family:var(--font-game);font-size:.65rem;color:var(--purple);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.2rem">Tabla Periódica Interactiva</div>
+        <div style="color:var(--dim);font-size:.82rem">Explora elementos · Grado 10: desafío de configuración electrónica</div>
+      </div>
+      <span style="margin-left:auto;color:var(--purple);font-size:1.2rem">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- ════ LESSON ════ -->
+<div class="screen" id="screen-lesson">
+  <div class="lesson-topbar">
+    <button class="back-btn" onclick="goHome()">← Inicio</button>
+    <div class="lesson-progress-wrap">
+      <div class="lesson-progress-label">LECCIÓN <span id="lesson-label"></span></div>
+      <div class="lesson-prog-track"><div class="lesson-prog-fill" id="lesson-prog" style="width:0%"></div></div>
+    </div>
+    <div class="lesson-hearts" id="lesson-hearts"></div>
+  </div>
+  <div class="lesson-content" id="lesson-content"></div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-topbar">
+    <div class="quiz-counter">PREGUNTA <span id="q-num">1</span> / 5</div>
+    <div class="timer-ring" id="timer-ring">
+      <svg width="44" height="44" viewBox="0 0 44 44">
+        <circle class="bg" cx="22" cy="22" r="18"/>
+        <circle class="fg" id="timer-circle" cx="22" cy="22" r="18"/>
+      </svg>
+      <div class="num" id="timer-num">20</div>
+    </div>
+    <div class="quiz-hearts-bar" id="quiz-hearts"></div>
+  </div>
+  <div class="quiz-body">
+    <div class="question-card" id="question-card"></div>
+  </div>
+</div>
+
+<!-- ════ RESULTS ════ -->
+<div class="screen" id="screen-periodic">
+  <div class="lesson-topbar">
+    <button class="back-btn" onclick="goHome()">← Inicio</button>
+    <div class="lesson-progress-wrap">
+      <div class="lesson-progress-label">TABLA PERIÓDICA INTERACTIVA</div>
+    </div>
+    <div id="pt-grade-badge" style="font-family:var(--font-game);font-size:.7rem;color:var(--purple);letter-spacing:.1em"></div>
+  </div>
+  <div id="pt-content"></div>
+</div>
+
+<div class="screen" id="screen-results">
+  <div class="results-card" id="results-card"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Level Up Overlay -->
+<div class="levelup-overlay" id="levelup-overlay">
+  <div style="font-size:4rem">🎊</div>
+  <div class="levelup-text">¡NIVEL <span id="new-level">2</span>!</div>
+  <div class="levelup-sub">¡SUBISTE DE NIVEL!</div>
+  <button class="levelup-close" onclick="closeLevelUp()">CONTINUAR →</button>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+const DAYS = {
+  8: [
+    {
+      id:"d8-1", day:1, icon:"🌡️", title:"La Materia", color:"#22d3ee",
+      slides:[
+        {
+          title:"¿Qué es la Materia?",
+          visual:"🪨 💧 💨",
+          text:"<strong>La materia</strong> es todo lo que tiene <strong>masa</strong> y ocupa un <strong>lugar en el espacio</strong>. Una piedra, el agua, el aire... ¡todo es materia!",
+          highlight:"💡 La materia existe en tres estados: sólido, líquido y gaseoso. El cambio entre ellos se llama <strong>cambio de estado</strong>.",
+          formulas:["Sólido","Líquido","Gaseoso"]
+        },
+        {
+          title:"Propiedades de la Materia",
+          visual:"⚖️ 📏 🌡️",
+          text:"Las propiedades se dividen en <strong>físicas</strong> (color, masa, volumen) que no cambian la sustancia, y <strong>químicas</strong> (combustión, oxidación) que sí transforman la sustancia.",
+          highlight:"🔬 Si hierves agua, cambia de estado pero sigue siendo agua (propiedad física). Si la quemas con hidrógeno, se obtiene H₂O (propiedad química).",
+          formulas:["Masa","Volumen","Densidad = m/v","Temperatura"]
+        },
+        {
+          title:"La Densidad",
+          visual:"🛢️",
+          text:"La <strong>densidad</strong> relaciona la masa con el volumen de un objeto. Un objeto denso pesa mucho para su tamaño. Por eso el hierro se hunde y la madera flota.",
+          highlight:"🧮 Fórmula: D = m / V\nUn cubo de hierro (7.87 g/cm³) es casi 8 veces más denso que el agua (1 g/cm³).",
+          formulas:["D = m / V","Agua: 1 g/cm³","Hierro: 7.87 g/cm³"]
+        }
+      ],
+      quiz:[
+        {q:"¿Cuál es la definición correcta de materia?",opts:["Solo los sólidos y líquidos","Todo lo que tiene masa y ocupa espacio","La energía que mueve los objetos","Solo los cuerpos visibles"],c:1,ex:"La materia incluye sólidos, líquidos y gases — todo lo que tiene masa y ocupa espacio."},
+        {q:"¿Cuál es una propiedad FÍSICA de la materia?",opts:["Combustión","Oxidación","Color amarillo","Fermentación"],c:2,ex:"El color es una propiedad física: no cambia la composición de la sustancia."},
+        {q:"¿Cuál es la fórmula de la densidad?",opts:["D = V × m","D = m + V","D = m / V","D = V / m"],c:2,ex:"Densidad = masa ÷ volumen. Unidades típicas: g/cm³ o kg/m³."},
+        {q:"Un objeto con densidad mayor que el agua…",opts:["Siempre flota","Se hunde en el agua","Desaparece","No tiene masa"],c:1,ex:"Si D > 1 g/cm³ (densidad del agua), el objeto se hunde."},
+        {q:"¿En qué estado la materia tiene forma y volumen definidos?",opts:["Gaseoso","Plasma","Líquido","Sólido"],c:3,ex:"En estado sólido las partículas están muy juntas y mantienen forma y volumen fijos."}
+      ]
+    },
+    {
+      id:"d8-2", day:2, icon:"⚛️", title:"El Átomo", color:"#3b82f6",
+      slides:[
+        {
+          title:"Descubriendo el Átomo",
+          visual:"⚛️",
+          text:"El <strong>átomo</strong> es la unidad más pequeña de la materia que conserva las propiedades de un elemento. Es tan pequeño que un millón de átomos caben en el grosor de un cabello.",
+          highlight:"📜 Historia: Dalton (1803) → Thomson (1897) → Rutherford (1911) → Bohr (1913) → Modelo cuántico moderno.",
+          formulas:["Protón (+)","Neutrón (0)","Electrón (-)"]
+        },
+        {
+          title:"Partículas Subatómicas",
+          visual:"🔴 Protones  ⚪ Neutrones  🔵 Electrones",
+          text:"El <strong>núcleo</strong> contiene protones (+) y neutrones (sin carga). Los <strong>electrones</strong> (−) orbitan alrededor en capas de energía. Un átomo neutro tiene igual número de protones y electrones.",
+          highlight:"⚡ El número de protones define el elemento. El hidrógeno tiene 1 protón, el helio 2, el carbono 6...",
+          formulas:["N° atómico = protones","N° másico = p⁺ + n⁰","Neutrones = A - Z"]
+        }
+      ],
+      quiz:[
+        {q:"¿Qué partícula define a qué elemento pertenece un átomo?",opts:["Electrón","Neutrón","Protón","Fotón"],c:2,ex:"El número atómico (Z) = número de protones. Cambia el número de protones → cambia el elemento."},
+        {q:"¿Dónde se encuentran los electrones?",opts:["En el núcleo","Orbitando el núcleo","Dentro del neutrón","No existen"],c:1,ex:"Los electrones orbitan el núcleo en capas o niveles de energía."},
+        {q:"Un átomo tiene 8 protones y 8 neutrones. ¿Cuál es su número másico?",opts:["8","16","4","24"],c:1,ex:"Número másico A = protones + neutrones = 8 + 8 = 16."},
+        {q:"¿Qué carga tiene un neutrón?",opts:["Positiva (+)","Negativa (-)","Sin carga (0)","Variable"],c:2,ex:"Los neutrones no tienen carga eléctrica. Su función es estabilizar el núcleo."},
+        {q:"¿Qué modelo atómico propuso órbitas circulares para los electrones?",opts:["Dalton","Thomson","Bohr","Schrödinger"],c:2,ex:"Niels Bohr (1913) propuso que los electrones se mueven en órbitas circulares de energía definida."}
+      ]
+    },
+    {
+      id:"d8-3", day:3, icon:"🔗", title:"Enlaces Químicos", color:"#4ade80",
+      slides:[
+        {
+          title:"¿Por qué se unen los átomos?",
+          visual:"Na⁺  +  Cl⁻  →  🧂 NaCl",
+          text:"Los átomos se unen para <strong>completar su último nivel</strong> de energía (Regla del octeto). Al unirse forman <strong>compuestos</strong> con propiedades completamente nuevas.",
+          highlight:"🧂 El sodio (Na) solo es un metal tóxico. El cloro (Cl₂) es un gas venenoso. Pero juntos forman NaCl: ¡sal de mesa comestible!",
+          formulas:["Iónico: Na⁺Cl⁻","Covalente: H₂O","Metálico: Fe(s)"]
+        },
+        {
+          title:"Tipos de Enlace",
+          visual:"🔴🔵 Iónico  |  ⚛⚛ Covalente  |  🔩 Metálico",
+          text:"<strong>Enlace iónico:</strong> transferencia de electrones entre metal y no-metal. <strong>Covalente:</strong> compartición de electrones entre no-metales. <strong>Metálico:</strong> entre metales, con electrones libres.",
+          highlight:"💧 El agua (H₂O) tiene enlace covalente polar — los electrones se comparten pero no por igual, dando al oxígeno mayor carga negativa.",
+          formulas:["NaCl → iónico","H₂O → covalente","Fe → metálico"]
+        }
+      ],
+      quiz:[
+        {q:"¿Qué tipo de enlace une al Na y al Cl en la sal de mesa?",opts:["Covalente apolar","Metálico","Iónico","Hidrógeno"],c:2,ex:"Na cede un electrón a Cl → formación de iones Na⁺ y Cl⁻ → enlace iónico."},
+        {q:"¿Qué ocurre en un enlace covalente?",opts:["Se transfieren electrones","Se comparten electrones","Los átomos se fusionan","Los neutrones se unen"],c:1,ex:"En el enlace covalente los átomos comparten pares de electrones."},
+        {q:"¿Cuál de estas moléculas tiene enlace covalente?",opts:["NaCl","MgO","H₂O","KBr"],c:2,ex:"H₂O se forma entre no-metales (H y O) → enlace covalente polar."},
+        {q:"La Regla del Octeto dice que los átomos buscan tener…",opts:["2 electrones en su último nivel","8 electrones en su último nivel","4 protones en el núcleo","10 neutrones"],c:1,ex:"La Regla del Octeto: los átomos son estables cuando tienen 8 electrones en su última capa (excepto H que busca 2)."},
+        {q:"¿Qué propiedad explica que los metales conduzcan electricidad?",opts:["Sus enlaces iónicos","Sus electrones libres (enlace metálico)","Sus neutrones móviles","Sus átomos pequeños"],c:1,ex:"En el enlace metálico los electrones de valencia son libres y se mueven por toda la red → conducción eléctrica."}
+      ]
+    },
+    {
+      id:"d8-4", day:4, icon:"⚗️", title:"Ácidos y Bases", color:"#fbbf24",
+      slides:[
+        {
+          title:"El Mundo del pH",
+          visual:"🍋 pH2  |  💧 pH7  |  🧼 pH12",
+          text:"El <strong>pH</strong> mide qué tan ácida o básica es una solución en una escala del 0 al 14. Ácidos (pH < 7), Neutro (pH = 7), Bases (pH > 7).",
+          highlight:"🌈 Los indicadores cambian de color según el pH: el tornasol se vuelve ROJO con ácidos y AZUL con bases. La col morada también funciona como indicador casero.",
+          formulas:["pH < 7 → Ácido","pH = 7 → Neutro","pH > 7 → Base"]
+        },
+        {
+          title:"Ácidos y Bases comunes",
+          visual:"HCl  |  H₂SO₄  |  NaOH  |  NH₃",
+          text:"<strong>Ácidos comunes:</strong> HCl (ácido del estómago), H₂SO₄ (batería de carro), vinagre (CH₃COOH). <strong>Bases comunes:</strong> NaOH (soda cáustica), leche de magnesia, bicarbonato.",
+          highlight:"⚗️ La reacción entre un ácido y una base se llama <strong>neutralización</strong>: HCl + NaOH → NaCl + H₂O (¡se forma sal y agua!)",
+          formulas:["HCl + NaOH → NaCl + H₂O","Neutralización","Sal + Agua"]
+        }
+      ],
+      quiz:[
+        {q:"¿Qué pH tiene una solución neutra?",opts:["0","7","14","3"],c:1,ex:"pH = 7 es neutro (como el agua pura a 25°C)."},
+        {q:"El jugo de limón tiene pH ≈ 2. ¿Es ácido, neutro o básico?",opts:["Básico","Neutro","Muy ácido","Ligeramente básico"],c:2,ex:"pH = 2 está muy por debajo de 7 → solución fuertemente ácida."},
+        {q:"¿Qué color toma el tornasol con una base?",opts:["Rojo","Amarillo","Azul","Verde"],c:2,ex:"El papel tornasol se vuelve AZUL en presencia de bases (pH > 7)."},
+        {q:"¿Cómo se llama la reacción entre un ácido y una base?",opts:["Oxidación","Neutralización","Combustión","Reducción"],c:1,ex:"La neutralización produce sal y agua: Ácido + Base → Sal + H₂O."},
+        {q:"¿Cuál de estos es un ácido común del laboratorio?",opts:["NaOH","NH₃","H₂SO₄","Ca(OH)₂"],c:2,ex:"El H₂SO₄ (ácido sulfúrico) es uno de los ácidos más usados en laboratorio e industria."}
+      ]
+    },
+    {
+      id:"d8-5", day:5, icon:"💥", title:"Reacciones Químicas", color:"#fb923c",
+      slides:[
+        {
+          title:"¿Qué es una Reacción Química?",
+          visual:"A + B  →  C + D",
+          text:"Una <strong>reacción química</strong> transforma los <strong>reactivos</strong> en nuevos <strong>productos</strong> con propiedades distintas. Los átomos no desaparecen — se reorganizan.",
+          highlight:"⚖️ Ley de Conservación de la Masa (Lavoisier, 1789): 'La masa total de los reactivos es igual a la masa total de los productos.'",
+          formulas:["Reactivos → Productos","Síntesis: A+B→AB","Descomposición: AB→A+B"]
+        },
+        {
+          title:"Tipos de Reacciones",
+          visual:"🔥 Combustión: CH₄ + 2O₂ → CO₂ + 2H₂O",
+          text:"<strong>Síntesis:</strong> A + B → AB. <strong>Descomposición:</strong> AB → A + B. <strong>Sustitución simple:</strong> A + BC → AC + B. <strong>Combustión:</strong> hidrocarburo + O₂ → CO₂ + H₂O.",
+          highlight:"🌱 La fotosíntesis es una reacción: 6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂. ¡Las plantas hacen azúcar con luz solar y CO₂!",
+          formulas:["2H₂ + O₂ → 2H₂O","CaCO₃ → CaO + CO₂","CH₄ + 2O₂ → CO₂ + 2H₂O"]
+        }
+      ],
+      quiz:[
+        {q:"En la ecuación: 2H₂ + O₂ → 2H₂O, ¿cuáles son los reactivos?",opts:["H₂O","H₂ y O₂","Solo O₂","Solo H₂"],c:1,ex:"Los reactivos están al lado izquierdo de la flecha: H₂ y O₂."},
+        {q:"¿Qué dice la Ley de Conservación de la Masa?",opts:["La masa aumenta en una reacción","La masa desaparece","La masa de reactivos = masa de productos","Solo aplica a gases"],c:2,ex:"Lavoisier demostró que en una reacción química la masa total se conserva — los átomos se reorganizan."},
+        {q:"¿Qué tipo de reacción es: CaCO₃ → CaO + CO₂?",opts:["Síntesis","Combustión","Descomposición","Sustitución"],c:2,ex:"Una sustancia se rompe en dos o más partes → Descomposición."},
+        {q:"¿Cuál es el producto de quemar metano (CH₄) con O₂?",opts:["Solo agua","CO₂ y H₂O","Solo CO₂","Carbono puro"],c:1,ex:"Combustión completa del metano: CH₄ + 2O₂ → CO₂ + 2H₂O."},
+        {q:"Para balancear 2H₂ + O₂ → 2H₂O, ¿cuántas moléculas de H₂ se necesitan?",opts:["1","2","3","4"],c:1,ex:"La ecuación balanceada es 2H₂ + O₂ → 2H₂O. Se necesitan 2 moléculas de H₂."}
+      ]
+    },
+    {
+      id:"d8-6", day:6, icon:"🧬", title:"Compuestos Inorgánicos", color:"#a78bfa",
+      slides:[
+        {
+          title:"Las 4 Familias Inorgánicas",
+          visual:"CaO  |  H₂SO₄  |  NaOH  |  NaCl",
+          text:"La química inorgánica organiza los compuestos en <strong>4 familias</strong>: Óxidos, Ácidos, Hidróxidos (bases) y Sales. Cada familia tiene características propias de formación y reacción.",
+          highlight:"🧱 El cemento es CaO + H₂O. El vinagre contiene CH₃COOH. La sal de cocina es NaCl. ¡La química inorgánica rodea tu vida diaria!",
+          formulas:["Óxidos: metal/no-metal + O₂","Hidróxidos: metal + OH","Ácidos: H + no-metal","Sales: ácido + base"]
+        },
+        {
+          title:"Cómo se Forman",
+          visual:"Na₂O + H₂O → 2NaOH",
+          text:"<strong>Óxidos básicos</strong> (metal + O₂) reaccionan con agua → Hidróxidos. <strong>Óxidos ácidos</strong> (no-metal + O₂) reaccionan con agua → Ácidos. Los ácidos y bases se neutralizan → Sales.",
+          highlight:"🔄 La cadena: Óxido + H₂O → Ácido/Base → Neutralización → Sal. ¡Todo está conectado!",
+          formulas:["CaO + H₂O → Ca(OH)₂","SO₃ + H₂O → H₂SO₄","HCl + NaOH → NaCl + H₂O"]
+        }
+      ],
+      quiz:[
+        {q:"¿A qué familia pertenece el NaOH?",opts:["Óxido básico","Sal","Hidróxido","Ácido"],c:2,ex:"NaOH tiene metal (Na) + grupo OH⁻ → es un hidróxido (también llamado base)."},
+        {q:"¿Qué familia forma la reacción entre un ácido y una base?",opts:["Óxidos","Sales","Hidróxidos","Elementos"],c:1,ex:"Ácido + Base → Sal + Agua (reacción de neutralización)."},
+        {q:"El CO₂ es un óxido de…",opts:["Metal (óxido básico)","No-metal (óxido ácido)","Hidróxido","Sal"],c:1,ex:"CO₂ = carbono (no-metal) + oxígeno → óxido ácido. CO₂ + H₂O → H₂CO₃ (ácido carbónico)."},
+        {q:"¿Cuál es la fórmula del hidróxido de sodio?",opts:["NaCl","Na₂O","NaOH","Na₂SO₄"],c:2,ex:"Hidróxido de sodio = Na + OH → NaOH. Es la sosa cáustica."},
+        {q:"¿Qué se produce cuando CaO reacciona con agua?",opts:["CaCl₂","Ca(OH)₂","CaCO₃","CaSO₄"],c:1,ex:"CaO + H₂O → Ca(OH)₂ (hidróxido de calcio / cal apagada). Óxido básico + agua → hidróxido."}
+      ]
+    }
+  ]
+};
+// ── SVG IMAGES ────────────────────────────────────────────────────
+const SVGS = {
+  estados_materia:`<svg viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg">
+    <rect width="520" height="180" fill="#0d1220"/>
+    <!-- SOLID -->
+    <rect x="20" y="30" width="140" height="120" rx="12" fill="#162033" stroke="#1e2d47" stroke-width="1.5"/>
+    <text x="90" y="22" text-anchor="middle" font-family="Orbitron" font-size="9" fill="#22d3ee" letter-spacing="2">SÓLIDO</text>
+    ${[0,1,2,3].map(r=>[0,1,2,3].map(c=>`<circle cx="${38+c*22}" cy="${50+r*22}" r="7" fill="#3b82f6" opacity=".9"/>`).join('')).join('')}
+    <!-- LIQUID -->
+    <rect x="190" y="30" width="140" height="120" rx="12" fill="#162033" stroke="#1e2d47" stroke-width="1.5"/>
+    <text x="260" y="22" text-anchor="middle" font-family="Orbitron" font-size="9" fill="#22d3ee" letter-spacing="2">LÍQUIDO</text>
+    <circle cx="210" cy="60" r="7" fill="#22d3ee" opacity=".85"/><circle cx="236" cy="75" r="7" fill="#22d3ee" opacity=".85"/>
+    <circle cx="255" cy="55" r="7" fill="#22d3ee" opacity=".85"/><circle cx="278" cy="80" r="7" fill="#22d3ee" opacity=".85"/>
+    <circle cx="220" cy="95" r="7" fill="#22d3ee" opacity=".85"/><circle cx="248" cy="105" r="7" fill="#22d3ee" opacity=".85"/>
+    <circle cx="270" cy="98" r="7" fill="#22d3ee" opacity=".85"/><circle cx="302" cy="65" r="7" fill="#22d3ee" opacity=".85"/>
+    <circle cx="295" cy="100" r="7" fill="#22d3ee" opacity=".85"/><circle cx="315" cy="120" r="7" fill="#22d3ee" opacity=".85"/>
+    <!-- GAS -->
+    <rect x="360" y="30" width="140" height="120" rx="12" fill="#162033" stroke="#1e2d47" stroke-width="1.5"/>
+    <text x="430" y="22" text-anchor="middle" font-family="Orbitron" font-size="9" fill="#22d3ee" letter-spacing="2">GASEOSO</text>
+    <circle cx="385" cy="55" r="6" fill="#a78bfa" opacity=".7"/><circle cx="430" cy="45" r="6" fill="#a78bfa" opacity=".7"/>
+    <circle cx="470" cy="70" r="6" fill="#a78bfa" opacity=".7"/><circle cx="395" cy="100" r="6" fill="#a78bfa" opacity=".7"/>
+    <circle cx="450" cy="115" r="6" fill="#a78bfa" opacity=".7"/><circle cx="415" cy="75" r="6" fill="#a78bfa" opacity=".7"/>
+    <circle cx="490" cy="130" r="6" fill="#a78bfa" opacity=".7"/><circle cx="375" cy="135" r="6" fill="#a78bfa" opacity=".7"/>
+  </svg>`,
+
+  densidad:`<svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="520" height="200" fill="#0d1220"/>
+    <!-- Beaker -->
+    <rect x="160" y="40" width="200" height="140" rx="8" fill="#162033" stroke="#1e2d47" stroke-width="2"/>
+    <!-- Water -->
+    <rect x="162" y="110" width="196" height="68" rx="0 0 8 8" fill="rgba(34,211,238,.15)" stroke="none"/>
+    <line x1="162" y1="110" x2="358" y2="110" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <!-- Wood floating -->
+    <rect x="195" y="90" width="60" height="28" rx="5" fill="#78716c"/>
+    <text x="225" y="109" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#e7e5e4">MADERA</text>
+    <text x="225" y="80" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#fbbf24">0.6 g/cm³</text>
+    <!-- Iron sinking -->
+    <rect x="285" y="140" width="55" height="30" rx="4" fill="#6b7280"/>
+    <text x="312" y="160" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#f1f5f9">HIERRO</text>
+    <text x="312" y="133" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#f87171">7.87 g/cm³</text>
+    <!-- Labels -->
+    <text x="90" y="110" text-anchor="middle" font-family="Orbitron" font-size="10" fill="#22d3ee">D = m/V</text>
+    <text x="90" y="128" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#64748b">Agua = 1 g/cm³</text>
+    <text x="430" y="95" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#4ade80">Flota si D &lt; agua</text>
+    <text x="430" y="115" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#f87171">Se hunde si D &gt; agua</text>
+  </svg>`,
+
+  atomo:`<svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="520" height="200" fill="#0d1220"/>
+    <!-- Nucleus -->
+    <circle cx="260" cy="100" r="28" fill="rgba(245,158,11,.15)" stroke="#f59e0b" stroke-width="2"/>
+    <circle cx="252" cy="95" r="8" fill="#ef4444"/><text x="252" y="99" text-anchor="middle" font-family="Orbitron" font-size="6" fill="white">p+</text>
+    <circle cx="268" cy="95" r="8" fill="#6b7280"/><text x="268" y="99" text-anchor="middle" font-family="Orbitron" font-size="6" fill="white">n</text>
+    <circle cx="260" cy="108" r="8" fill="#ef4444"/><text x="260" y="112" text-anchor="middle" font-family="Orbitron" font-size="6" fill="white">p+</text>
+    <!-- Orbit 1 -->
+    <ellipse cx="260" cy="100" rx="70" ry="35" fill="none" stroke="rgba(34,211,238,.3)" stroke-width="1.5"/>
+    <circle cx="330" cy="100" r="7" fill="#22d3ee"/><text x="330" y="104" text-anchor="middle" font-family="Orbitron" font-size="6" fill="#0d1220">e-</text>
+    <!-- Orbit 2 -->
+    <ellipse cx="260" cy="100" rx="110" ry="55" fill="none" stroke="rgba(167,139,250,.3)" stroke-width="1.5" transform="rotate(60,260,100)"/>
+    <circle cx="195" cy="55" r="7" fill="#a78bfa"/><text x="195" y="59" text-anchor="middle" font-family="Orbitron" font-size="6" fill="#0d1220">e-</text>
+    <!-- Orbit 3 -->
+    <ellipse cx="260" cy="100" rx="140" ry="60" fill="none" stroke="rgba(74,222,128,.25)" stroke-width="1.5" transform="rotate(-40,260,100)"/>
+    <circle cx="380" cy="60" r="7" fill="#4ade80"/><text x="380" y="64" text-anchor="middle" font-family="Orbitron" font-size="6" fill="#0d1220">e-</text>
+    <!-- Labels -->
+    <text x="260" y="185" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#64748b">NÚCLEO: protones(+) y neutrones · CORTEZA: electrones(−)</text>
+  </svg>`,
+
+  enlace:`<svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="520" height="200" fill="#0d1220"/>
+    <!-- Ionic -->
+    <rect x="15" y="25" width="145" height="155" rx="12" fill="#162033" stroke="#1e2d47" stroke-width="1.5"/>
+    <text x="88" y="19" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#fbbf24" letter-spacing="1">IÓNICO</text>
+    <circle cx="60" cy="90" r="26" fill="rgba(251,191,36,.15)" stroke="#fbbf24" stroke-width="2"/>
+    <text x="60" y="86" text-anchor="middle" font-family="Orbitron" font-size="11" fill="#fbbf24" font-weight="700">Na</text>
+    <text x="60" y="100" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#fbbf24">+</text>
+    <circle cx="120" cy="90" r="30" fill="rgba(34,211,238,.12)" stroke="#22d3ee" stroke-width="2"/>
+    <text x="120" y="86" text-anchor="middle" font-family="Orbitron" font-size="11" fill="#22d3ee" font-weight="700">Cl</text>
+    <text x="120" y="100" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#22d3ee">−</text>
+    <text x="88" y="145" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#64748b">Transferencia e⁻</text>
+    <text x="88" y="162" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#fbbf24">NaCl</text>
+    <!-- Covalent -->
+    <rect x="188" y="25" width="145" height="155" rx="12" fill="#162033" stroke="#1e2d47" stroke-width="1.5"/>
+    <text x="260" y="19" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#4ade80" letter-spacing="1">COVALENTE</text>
+    <circle cx="230" cy="90" r="26" fill="rgba(74,222,128,.12)" stroke="#4ade80" stroke-width="2"/>
+    <text x="230" y="95" text-anchor="middle" font-family="Orbitron" font-size="13" fill="#4ade80" font-weight="700">H</text>
+    <circle cx="290" cy="90" r="26" fill="rgba(167,139,250,.12)" stroke="#a78bfa" stroke-width="2"/>
+    <text x="290" y="95" text-anchor="middle" font-family="Orbitron" font-size="13" fill="#a78bfa" font-weight="700">O</text>
+    <circle cx="260" cy="90" r="8" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+    <text x="260" y="145" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#64748b">Compartición e⁻</text>
+    <text x="260" y="162" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#4ade80">H₂O</text>
+    <!-- Metallic -->
+    <rect x="361" y="25" width="145" height="155" rx="12" fill="#162033" stroke="#1e2d47" stroke-width="1.5"/>
+    <text x="433" y="19" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#94a3b8" letter-spacing="1">METÁLICO</text>
+    ${[[390,65],[430,65],[470,65],[390,100],[430,100],[470,100],[390,130],[430,130],[470,130]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="14" fill="rgba(148,163,184,.2)" stroke="#94a3b8" stroke-width="1.5"/>`).join('')}
+    <circle cx="415" cy="83" r="4" fill="#fbbf24" opacity=".8"/><circle cx="448" cy="113" r="4" fill="#fbbf24" opacity=".8"/>
+    <circle cx="403" cy="118" r="4" fill="#fbbf24" opacity=".8"/><circle cx="462" cy="78" r="4" fill="#fbbf24" opacity=".8"/>
+    <text x="433" y="155" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#64748b">e⁻ libres</text>
+    <text x="433" y="168" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#94a3b8">Fe, Cu, Au</text>
+  </svg>`,
+
+  ph:`<svg viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg">
+    <rect width="520" height="180" fill="#0d1220"/>
+    <defs>
+      <linearGradient id="phgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#ef4444"/><stop offset="30%" style="stop-color:#f97316"/>
+        <stop offset="50%" style="stop-color:#4ade80"/><stop offset="70%" style="stop-color:#3b82f6"/>
+        <stop offset="100%" style="stop-color:#a78bfa"/>
+      </linearGradient>
+    </defs>
+    <rect x="30" y="55" width="460" height="30" rx="15" fill="url(#phgrad)" opacity=".85"/>
+    <!-- Scale ticks -->
+    ${Array.from({length:15},(_, i)=>`<line x1="${30+i*33}" y1="85" x2="${30+i*33}" y2="95" stroke="#64748b" stroke-width="1.5"/>
+    <text x="${30+i*33}" y="108" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#94a3b8">${i}</text>`).join('')}
+    <!-- Labels -->
+    <text x="120" y="40" text-anchor="middle" font-family="Orbitron" font-size="9" fill="#ef4444">ÁCIDO</text>
+    <text x="265" y="40" text-anchor="middle" font-family="Orbitron" font-size="9" fill="#4ade80">NEUTRO</text>
+    <text x="400" y="40" text-anchor="middle" font-family="Orbitron" font-size="9" fill="#a78bfa">BASE</text>
+    <!-- Markers -->
+    <line x1="63" y1="50" x2="63" y2="85" stroke="#fbbf24" stroke-width="2" stroke-dasharray="3,2"/>
+    <text x="63" y="47" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#fbbf24">HCl</text>
+    <line x1="96" y1="50" x2="96" y2="85" stroke="#fb923c" stroke-width="2" stroke-dasharray="3,2"/>
+    <text x="96" y="47" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#fb923c">🍋</text>
+    <line x1="261" y1="50" x2="261" y2="85" stroke="#4ade80" stroke-width="2" stroke-dasharray="3,2"/>
+    <text x="261" y="47" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#4ade80">H₂O</text>
+    <line x1="424" y1="50" x2="424" y2="85" stroke="#a78bfa" stroke-width="2" stroke-dasharray="3,2"/>
+    <text x="424" y="47" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#a78bfa">NaOH</text>
+    <text x="260" y="155" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#64748b">pH &lt; 7 → Ácido · pH = 7 → Neutro · pH &gt; 7 → Base</text>
+  </svg>`,
+
+  reaccion:`<svg viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg">
+    <rect width="520" height="180" fill="#0d1220"/>
+    <!-- Reactants -->
+    <rect x="20" y="50" width="100" height="80" rx="12" fill="#162033" stroke="#f59e0b" stroke-width="2"/>
+    <text x="70" y="85" text-anchor="middle" font-family="Orbitron" font-size="14" fill="#f59e0b" font-weight="700">2H₂</text>
+    <text x="70" y="102" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#94a3b8">Reactivo</text>
+    <rect x="140" y="50" width="100" height="80" rx="12" fill="#162033" stroke="#f59e0b" stroke-width="2"/>
+    <text x="190" y="85" text-anchor="middle" font-family="Orbitron" font-size="14" fill="#f59e0b" font-weight="700">O₂</text>
+    <text x="190" y="102" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#94a3b8">Reactivo</text>
+    <!-- Arrow with energy -->
+    <line x1="255" y1="90" x2="310" y2="90" stroke="#22d3ee" stroke-width="3"/>
+    <polygon points="310,84 325,90 310,96" fill="#22d3ee"/>
+    <text x="285" y="78" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#22d3ee">Energía</text>
+    <text x="285" y="108" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#64748b">Reacción</text>
+    <!-- Product -->
+    <rect x="335" y="40" width="165" height="100" rx="12" fill="#162033" stroke="#4ade80" stroke-width="2"/>
+    <text x="417" y="82" text-anchor="middle" font-family="Orbitron" font-size="16" fill="#4ade80" font-weight="700">2H₂O</text>
+    <text x="417" y="100" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#94a3b8">Producto</text>
+    <text x="417" y="116" text-anchor="middle" font-family="Orbitron" font-size="7" fill="#4ade80">Masa conservada ✓</text>
+    <!-- Bottom note -->
+    <text x="260" y="165" text-anchor="middle" font-family="Orbitron" font-size="7.5" fill="#64748b">Ley de Lavoisier: masa reactivos = masa productos</text>
+  </svg>`,
+
+  compuestos:`<svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="520" height="200" fill="#0d1220"/>
+    ${[{x:15,y:15,w:115,h:80,c:'#3b82f6',t:'ÓXIDOS',f1:'CaO',f2:'SO₃'},{x:145,y:15,w:115,h:80,c:'#fbbf24',t:'ÁCIDOS',f1:'HCl',f2:'H₂SO₄'},
+       {x:275,y:15,w:115,h:80,c:'#a78bfa',t:'HIDRÓXIDOS',f1:'NaOH',f2:'Ca(OH)₂'},{x:405,y:15,w:110,h:80,c:'#4ade80',t:'SALES',f1:'NaCl',f2:'CaSO₄'}]
+    .map(b=>`
+      <rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="12" fill="rgba(0,0,0,.2)" stroke="${b.c}" stroke-width="1.5"/>
+      <text x="${b.x+b.w/2}" y="${b.y+18}" text-anchor="middle" font-family="Orbitron" font-size="7.5" fill="${b.c}" letter-spacing="1">${b.t}</text>
+      <text x="${b.x+b.w/2}" y="${b.y+44}" text-anchor="middle" font-family="Orbitron" font-size="13" fill="${b.c}" font-weight="700">${b.f1}</text>
+      <text x="${b.x+b.w/2}" y="${b.y+63}" text-anchor="middle" font-family="Orbitron" font-size="10" fill="${b.c}" opacity=".7">${b.f2}</text>
+    `).join('')}
+    <!-- Arrows chain -->
+    <text x="260" y="120" text-anchor="middle" font-family="Orbitron" font-size="9" fill="#22d3ee">CADENA DE FORMACIÓN</text>
+    <text x="260" y="140" text-anchor="middle" font-family="Orbitron" font-size="8.5" fill="#94a3b8">Óxido + H₂O → Ácido / Hidróxido</text>
+    <text x="260" y="160" text-anchor="middle" font-family="Orbitron" font-size="8.5" fill="#94a3b8">Ácido + Hidróxido → Sal + H₂O</text>
+    <text x="260" y="183" text-anchor="middle" font-family="Orbitron" font-size="8" fill="#fbbf24">HCl + NaOH → NaCl + H₂O</text>
+  </svg>`
+};
+
+// Attach images to slides
+DAYS[8][0].slides[0].img = SVGS.estados_materia; DAYS[8][0].slides[0].imgCaption = "ESTADOS DE LA MATERIA — Organización de partículas";
+DAYS[8][0].slides[2].img = SVGS.densidad;        DAYS[8][0].slides[2].imgCaption = "DENSIDAD — Por qué algunos objetos flotan";
+DAYS[8][1].slides[0].img = SVGS.atomo;           DAYS[8][1].slides[0].imgCaption = "MODELO ATÓMICO — Núcleo y corteza electrónica";
+DAYS[8][2].slides[0].img = SVGS.enlace;          DAYS[8][2].slides[0].imgCaption = "TIPOS DE ENLACE — Iónico, covalente y metálico";
+DAYS[8][3].slides[0].img = SVGS.ph;              DAYS[8][3].slides[0].imgCaption = "ESCALA DE pH — De 0 (muy ácido) a 14 (muy básico)";
+DAYS[8][4].slides[0].img = SVGS.reaccion;        DAYS[8][4].slides[0].imgCaption = "REACCIÓN QUÍMICA — Reactivos → Productos";
+DAYS[8][5].slides[0].img = SVGS.compuestos;      DAYS[8][5].slides[0].imgCaption = "FAMILIAS INORGÁNICAS — Óxidos, Ácidos, Hidróxidos, Sales";
+
+// Grade 10: same days with advanced label + same images
+DAYS[10] = DAYS[8].map(d=>({...d, id:d.id.replace('d8','d10'),
+  slides:d.slides.map(s=>({...s,
+    text:s.text+' <span style="color:var(--purple);font-size:.85rem">[Nivel Avanzado: analiza a profundidad molecular]</span>'
+  }))
+}));
+
+// ── PERIODIC TABLE DATA ────────────────────────────────────────────
+// Full 118 elements: [Z, Symbol, Name, Group, Period, Block, Mass, Config, Color-category]
+// Color categories: 1=alkali, 2=alkaline, 3=transition, 4=post-transition, 5=metalloid,
+//                   6=nonmetal, 7=halogen, 8=noble, 9=lanthanide, 10=actinide
+const PT_COLORS = {
+  1:'#ef4444',2:'#f97316',3:'#a78bfa',4:'#64748b',5:'#22d3ee',
+  6:'#4ade80',7:'#fb923c',8:'#818cf8',9:'#f472b6',10:'#f87171'
+};
+const PT_CAT_NAMES = {
+  1:'Metal alcalino',2:'Metal alcalinotérreo',3:'Metal de transición',
+  4:'Metal post-transición',5:'Metaloide',6:'No metal',
+  7:'Halógeno',8:'Gas noble',9:'Lantánido',10:'Actínido'
+};
+// [Z, sym, name, group, period, block, mass(rounded), shortConfig, cat]
+const ELEMENTS_RAW = [
+  [1,'H','Hidrógeno',1,1,'s',1,'1s¹',6],[2,'He','Helio',18,1,'s',4,'1s²',8],
+  [3,'Li','Litio',1,2,'s',7,'[He] 2s¹',1],[4,'Be','Berilio',2,2,'s',9,'[He] 2s²',2],
+  [5,'B','Boro',13,2,'p',11,'[He] 2s² 2p¹',5],[6,'C','Carbono',14,2,'p',12,'[He] 2s² 2p²',6],
+  [7,'N','Nitrógeno',15,2,'p',14,'[He] 2s² 2p³',6],[8,'O','Oxígeno',16,2,'p',16,'[He] 2s² 2p⁴',6],
+  [9,'F','Flúor',17,2,'p',19,'[He] 2s² 2p⁵',7],[10,'Ne','Neón',18,2,'p',20,'[He] 2s² 2p⁶',8],
+  [11,'Na','Sodio',1,3,'s',23,'[Ne] 3s¹',1],[12,'Mg','Magnesio',2,3,'s',24,'[Ne] 3s²',2],
+  [13,'Al','Aluminio',13,3,'p',27,'[Ne] 3s² 3p¹',4],[14,'Si','Silicio',14,3,'p',28,'[Ne] 3s² 3p²',5],
+  [15,'P','Fósforo',15,3,'p',31,'[Ne] 3s² 3p³',6],[16,'S','Azufre',16,3,'p',32,'[Ne] 3s² 3p⁴',6],
+  [17,'Cl','Cloro',17,3,'p',35,'[Ne] 3s² 3p⁵',7],[18,'Ar','Argón',18,3,'p',40,'[Ne] 3s² 3p⁶',8],
+  [19,'K','Potasio',1,4,'s',39,'[Ar] 4s¹',1],[20,'Ca','Calcio',2,4,'s',40,'[Ar] 4s²',2],
+  [21,'Sc','Escandio',3,4,'d',45,'[Ar] 3d¹ 4s²',3],[22,'Ti','Titanio',4,4,'d',48,'[Ar] 3d² 4s²',3],
+  [23,'V','Vanadio',5,4,'d',51,'[Ar] 3d³ 4s²',3],[24,'Cr','Cromo',6,4,'d',52,'[Ar] 3d⁵ 4s¹',3],
+  [25,'Mn','Manganeso',7,4,'d',55,'[Ar] 3d⁵ 4s²',3],[26,'Fe','Hierro',8,4,'d',56,'[Ar] 3d⁶ 4s²',3],
+  [27,'Co','Cobalto',9,4,'d',59,'[Ar] 3d⁷ 4s²',3],[28,'Ni','Níquel',10,4,'d',58,'[Ar] 3d⁸ 4s²',3],
+  [29,'Cu','Cobre',11,4,'d',64,'[Ar] 3d¹⁰ 4s¹',3],[30,'Zn','Zinc',12,4,'d',65,'[Ar] 3d¹⁰ 4s²',3],
+  [31,'Ga','Galio',13,4,'p',70,'[Ar] 3d¹⁰ 4s² 4p¹',4],[32,'Ge','Germanio',14,4,'p',73,'[Ar] 3d¹⁰ 4s² 4p²',5],
+  [33,'As','Arsénico',15,4,'p',75,'[Ar] 3d¹⁰ 4s² 4p³',5],[34,'Se','Selenio',16,4,'p',79,'[Ar] 3d¹⁰ 4s² 4p⁴',6],
+  [35,'Br','Bromo',17,4,'p',80,'[Ar] 3d¹⁰ 4s² 4p⁵',7],[36,'Kr','Kriptón',18,4,'p',84,'[Ar] 3d¹⁰ 4s² 4p⁶',8],
+  [37,'Rb','Rubidio',1,5,'s',85,'[Kr] 5s¹',1],[38,'Sr','Estroncio',2,5,'s',88,'[Kr] 5s²',2],
+  [39,'Y','Itrio',3,5,'d',89,'[Kr] 4d¹ 5s²',3],[40,'Zr','Circonio',4,5,'d',91,'[Kr] 4d² 5s²',3],
+  [41,'Nb','Niobio',5,5,'d',93,'[Kr] 4d⁴ 5s¹',3],[42,'Mo','Molibdeno',6,5,'d',96,'[Kr] 4d⁵ 5s¹',3],
+  [43,'Tc','Tecnecio',7,5,'d',97,'[Kr] 4d⁵ 5s²',3],[44,'Ru','Rutenio',8,5,'d',101,'[Kr] 4d⁷ 5s¹',3],
+  [45,'Rh','Rodio',9,5,'d',103,'[Kr] 4d⁸ 5s¹',3],[46,'Pd','Paladio',10,5,'d',106,'[Kr] 4d¹⁰',3],
+  [47,'Ag','Plata',11,5,'d',108,'[Kr] 4d¹⁰ 5s¹',3],[48,'Cd','Cadmio',12,5,'d',112,'[Kr] 4d¹⁰ 5s²',3],
+  [49,'In','Indio',13,5,'p',115,'[Kr] 4d¹⁰ 5s² 5p¹',4],[50,'Sn','Estaño',14,5,'p',119,'[Kr] 4d¹⁰ 5s² 5p²',4],
+  [51,'Sb','Antimonio',15,5,'p',122,'[Kr] 4d¹⁰ 5s² 5p³',5],[52,'Te','Teluro',16,5,'p',128,'[Kr] 4d¹⁰ 5s² 5p⁴',5],
+  [53,'I','Yodo',17,5,'p',127,'[Kr] 4d¹⁰ 5s² 5p⁵',7],[54,'Xe','Xenón',18,5,'p',131,'[Kr] 4d¹⁰ 5s² 5p⁶',8],
+  [55,'Cs','Cesio',1,6,'s',133,'[Xe] 6s¹',1],[56,'Ba','Bario',2,6,'s',137,'[Xe] 6s²',2],
+  [72,'Hf','Hafnio',4,6,'d',178,'[Xe] 4f¹⁴ 5d² 6s²',3],[73,'Ta','Tántalo',5,6,'d',181,'[Xe] 4f¹⁴ 5d³ 6s²',3],
+  [74,'W','Wolframio',6,6,'d',184,'[Xe] 4f¹⁴ 5d⁴ 6s²',3],[75,'Re','Renio',7,6,'d',186,'[Xe] 4f¹⁴ 5d⁵ 6s²',3],
+  [76,'Os','Osmio',8,6,'d',190,'[Xe] 4f¹⁴ 5d⁶ 6s²',3],[77,'Ir','Iridio',9,6,'d',192,'[Xe] 4f¹⁴ 5d⁷ 6s²',3],
+  [78,'Pt','Platino',10,6,'d',195,'[Xe] 4f¹⁴ 5d⁹ 6s¹',3],[79,'Au','Oro',11,6,'d',197,'[Xe] 4f¹⁴ 5d¹⁰ 6s¹',3],
+  [80,'Hg','Mercurio',12,6,'d',201,'[Xe] 4f¹⁴ 5d¹⁰ 6s²',3],[81,'Tl','Talio',13,6,'p',204,'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹',4],
+  [82,'Pb','Plomo',14,6,'p',207,'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²',4],[83,'Bi','Bismuto',15,6,'p',209,'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³',4],
+  [84,'Po','Polonio',16,6,'p',209,'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴',4],[85,'At','Astato',17,6,'p',210,'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵',7],
+  [86,'Rn','Radón',18,6,'p',222,'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶',8],
+  [87,'Fr','Francio',1,7,'s',223,'[Rn] 7s¹',1],[88,'Ra','Radio',2,7,'s',226,'[Rn] 7s²',2],
+  [104,'Rf','Rutherfordio',4,7,'d',267,'[Rn] 5f¹⁴ 6d² 7s²',3],[105,'Db','Dubnio',5,7,'d',268,'[Rn] 5f¹⁴ 6d³ 7s²',3],
+  [106,'Sg','Seaborgio',6,7,'d',269,'[Rn] 5f¹⁴ 6d⁴ 7s²',3],[107,'Bh','Bohrio',7,7,'d',270,'[Rn] 5f¹⁴ 6d⁵ 7s²',3],
+  [108,'Hs','Hassio',8,7,'d',277,'[Rn] 5f¹⁴ 6d⁶ 7s²',3],[109,'Mt','Meitnerio',9,7,'d',278,'[Rn] 5f¹⁴ 6d⁷ 7s²',3],
+  [110,'Ds','Darmstadtio',10,7,'d',281,'[Rn] 5f¹⁴ 6d⁸ 7s²',3],[111,'Rg','Roentgenio',11,7,'d',282,'[Rn] 5f¹⁴ 6d⁹ 7s²',3],
+  [112,'Cn','Copernicio',12,7,'d',285,'[Rn] 5f¹⁴ 6d¹⁰ 7s²',3],[113,'Nh','Nihonio',13,7,'p',286,'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹',4],
+  [114,'Fl','Flerovio',14,7,'p',289,'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²',4],[115,'Mc','Moscovio',15,7,'p',290,'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³',4],
+  [116,'Lv','Livermorio',16,7,'p',293,'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴',4],[117,'Ts','Teneso',17,7,'p',294,'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵',7],
+  [118,'Og','Oganesón',18,7,'p',294,'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶',8],
+  // Lanthanides (row 8 of display, period 6)
+  [57,'La','Lantano',null,8,'f',139,'[Xe] 5d¹ 6s²',9],[58,'Ce','Cerio',null,8,'f',140,'[Xe] 4f¹ 5d¹ 6s²',9],
+  [59,'Pr','Praseodimio',null,8,'f',141,'[Xe] 4f³ 6s²',9],[60,'Nd','Neodimio',null,8,'f',144,'[Xe] 4f⁴ 6s²',9],
+  [61,'Pm','Prometio',null,8,'f',145,'[Xe] 4f⁵ 6s²',9],[62,'Sm','Samario',null,8,'f',150,'[Xe] 4f⁶ 6s²',9],
+  [63,'Eu','Europio',null,8,'f',152,'[Xe] 4f⁷ 6s²',9],[64,'Gd','Gadolinio',null,8,'f',157,'[Xe] 4f⁷ 5d¹ 6s²',9],
+  [65,'Tb','Terbio',null,8,'f',159,'[Xe] 4f⁹ 6s²',9],[66,'Dy','Disprosio',null,8,'f',163,'[Xe] 4f¹⁰ 6s²',9],
+  [67,'Ho','Holmio',null,8,'f',165,'[Xe] 4f¹¹ 6s²',9],[68,'Er','Erbio',null,8,'f',167,'[Xe] 4f¹² 6s²',9],
+  [69,'Tm','Tulio',null,8,'f',169,'[Xe] 4f¹³ 6s²',9],[70,'Yb','Iterbio',null,8,'f',173,'[Xe] 4f¹⁴ 6s²',9],
+  [71,'Lu','Lutecio',null,8,'f',175,'[Xe] 4f¹⁴ 5d¹ 6s²',9],
+  // Actinides (row 9 of display, period 7)
+  [89,'Ac','Actinio',null,9,'f',227,'[Rn] 6d¹ 7s²',10],[90,'Th','Torio',null,9,'f',232,'[Rn] 6d² 7s²',10],
+  [91,'Pa','Protactinio',null,9,'f',231,'[Rn] 5f² 6d¹ 7s²',10],[92,'U','Uranio',null,9,'f',238,'[Rn] 5f³ 6d¹ 7s²',10],
+  [93,'Np','Neptunio',null,9,'f',237,'[Rn] 5f⁴ 6d¹ 7s²',10],[94,'Pu','Plutonio',null,9,'f',244,'[Rn] 5f⁶ 7s²',10],
+  [95,'Am','Americio',null,9,'f',243,'[Rn] 5f⁷ 7s²',10],[96,'Cm','Curio',null,9,'f',247,'[Rn] 5f⁷ 6d¹ 7s²',10],
+  [97,'Bk','Berkelio',null,9,'f',247,'[Rn] 5f⁹ 7s²',10],[98,'Cf','Californio',null,9,'f',251,'[Rn] 5f¹⁰ 7s²',10],
+  [99,'Es','Einstenio',null,9,'f',252,'[Rn] 5f¹¹ 7s²',10],[100,'Fm','Fermio',null,9,'f',257,'[Rn] 5f¹² 7s²',10],
+  [101,'Md','Mendelevio',null,9,'f',258,'[Rn] 5f¹³ 7s²',10],[102,'No','Nobelio',null,9,'f',259,'[Rn] 5f¹⁴ 7s²',10],
+  [103,'Lr','Lawrencio',null,9,'f',262,'[Rn] 5f¹⁴ 7s² 7p¹',10],
+];
+
+// Build lookup by Z
+const ELEM_BY_Z = {};
+ELEMENTS_RAW.forEach(e=>{ ELEM_BY_Z[e[0]]={z:e[0],sym:e[1],name:e[2],group:e[3],period:e[4],block:e[5],mass:e[6],config:e[7],cat:e[8]}; });
+
+// Grid position map [Z] → [row, col] (1-based, rows 1-9, cols 1-18)
+// rows 8-9 are lanthanide/actinide series below main table
+const GRID_POS = {};
+ELEMENTS_RAW.forEach(e=>{
+  const [z,,,,period,,,, ] = e;
+  const group = e[3];
+  if(group !== null && period <= 7){
+    GRID_POS[z] = [period, group];
+  }
+});
+// Lanthanides: row 9 display (below table gap), cols 4-18
+[57,58,59,60,61,62,63,64,65,66,67,68,69,70,71].forEach((z,i)=>{ GRID_POS[z]=[9,i+4]; });
+// Actinides: row 10 display, cols 4-18
+[89,90,91,92,93,94,95,96,97,98,99,100,101,102,103].forEach((z,i)=>{ GRID_POS[z]=[10,i+4]; });
+
+// Challenge pool: elements for grade-10 challenge (well-known ones with clear configs)
+const CHALLENGE_POOL = [1,2,6,7,8,11,12,13,17,18,19,20,26,29,30,35,36,47,53,79,82];
+
+// ── PERIODIC TABLE ENGINE ─────────────────────────────────────────
+let ptSelectedElem = null;
+let ptChallengeElem = null;
+let ptScore = 0;
+let ptAttempts = 0;
+
+function openPeriodicTable(){
+  showScreen('periodic');
+  document.getElementById('pt-grade-badge').textContent = state.grade + '° GRADO';
+  ptScore = 0; ptAttempts = 0;
+  renderPeriodicTable();
+  focusPrimaryContent('#screen-periodic .pt-screen');
+}
+
+function renderPeriodicTable(){
+  const isG10 = state.grade === 10;
+  const c = document.getElementById('pt-content');
+
+  // Build 10-row × 18-col grid (rows 1-7 main + gap row + rows 9-10 f-block)
+  const gridCells = [];
+  for(let row=1; row<=10; row++){
+    for(let col=1; col<=18; col++){
+      // Find element at this position
+      let elem = null;
+      for(const z in GRID_POS){
+        const [r,cl] = GRID_POS[z];
+        if(r===row && cl===col){ elem = ELEM_BY_Z[z]; break; }
+      }
+      // Row 8 = visual gap row (lanthanide/actinide separator)
+      if(row===8){ gridCells.push({empty:true, gap:true}); continue; }
+      if(!elem){ gridCells.push({empty:true}); continue; }
+      gridCells.push(elem);
+    }
+  }
+
+  const legend = Object.entries(PT_COLORS).map(([k,v])=>`
+    <div class="pt-leg-item">
+      <div class="pt-leg-dot" style="background:${v}"></div>
+      <span>${PT_CAT_NAMES[k]}</span>
+    </div>`).join('');
+
+  c.innerHTML = `<div class="pt-screen">
+    <div class="pt-title">⚗ TABLA PERIÓDICA DE LOS ELEMENTOS ${isG10?'· DESAFÍO GRADO 10':''}</div>
+    <div class="pt-legend">${legend}</div>
+    <div class="pt-grid" id="pt-grid">
+      ${gridCells.map((el,i)=>{
+        if(el.empty && el.gap) return `<div class="pt-cell empty" style="background:transparent;border:none"></div>`;
+        if(el.empty) return `<div class="pt-cell empty"></div>`;
+        const col = PT_COLORS[el.cat]||'#64748b';
+        const bg  = col+'22';
+        return `<div class="pt-cell" id="ptc-${el.z}"
+          style="background:${bg};border-color:${col}33"
+          onclick="selectElement(${el.z})">
+          <span class="pt-num">${el.z}</span>
+          <span class="pt-sym" style="color:${col}">${el.sym}</span>
+          <span class="pt-name">${el.name}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div id="elem-detail"></div>
+    ${isG10 ? `
+    <div class="pt-challenge" id="pt-challenge-panel">
+      <div class="pt-challenge-title">⚡ DESAFÍO — Identificar Grupo, Período y Bloque</div>
+      <div id="challenge-body">
+        <div style="font-size:.85rem;color:var(--dim);margin-bottom:1rem">
+          Se te mostrará una <strong>configuración electrónica</strong>. Localiza el elemento en la tabla y luego completa grupo, período y bloque.
+        </div>
+        <button class="ch-check-btn" style="grid-column:unset;max-width:280px" onclick="newChallenge()">🎯 COMENZAR DESAFÍO</button>
+      </div>
+      <div class="pt-score-bar" id="pt-score-bar" style="display:none">
+        <span>Puntuación:</span>
+        <span class="pt-score-val" id="pt-score-val">0</span>
+        <span style="color:var(--muted)">/ <span id="pt-attempts-val">0</span> intentos</span>
+        <button onclick="newChallenge()" style="margin-left:auto;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.3rem .8rem;font-family:var(--font-game);font-size:.6rem;color:var(--dim);cursor:pointer">SIGUIENTE →</button>
+      </div>
+    </div>` : `
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-top:1rem;font-size:.82rem;color:var(--dim)">
+      💡 <strong style="color:var(--cyan)">Grado 8:</strong> Haz clic en cualquier elemento para ver su información detallada.
+      En <strong style="color:var(--purple)">Grado 10</strong> se activa el desafío de configuración electrónica.
+    </div>`}
+  </div>`;
+}
+
+function selectElement(z){
+  ptSelectedElem = ELEM_BY_Z[z];
+  // Highlight
+  document.querySelectorAll('.pt-cell').forEach(c=>c.classList.remove('selected'));
+  const cell = document.getElementById('ptc-'+z);
+  if(cell) cell.classList.add('selected');
+
+  const el = ptSelectedElem;
+  const col = PT_COLORS[el.cat]||'#64748b';
+  const groupStr = el.group ? `Grupo ${el.group}` : (el.period===9?'Lantánido':'Actínido');
+
+  document.getElementById('elem-detail').innerHTML = `
+    <div class="elem-panel">
+      <div class="elem-big" style="background:${col}22;border:2px solid ${col}">
+        <span class="num">${el.z}</span>
+        <span class="sym" style="color:${col}">${el.sym}</span>
+        <span class="nm">${el.name}</span>
+        <span class="mass">${el.mass} u</span>
+      </div>
+      <div class="elem-info-grid">
+        <div class="elem-info-item"><div class="elem-info-label">Categoría</div><div class="elem-info-val" style="color:${col}">${PT_CAT_NAMES[el.cat]}</div></div>
+        <div class="elem-info-item"><div class="elem-info-label">Grupo</div><div class="elem-info-val">${groupStr}</div></div>
+        <div class="elem-info-item"><div class="elem-info-label">Período</div><div class="elem-info-val">${el.period<=7?el.period:(el.period===8||el.period===9)?6+' / Serie f':'?'}</div></div>
+        <div class="elem-info-item"><div class="elem-info-label">Bloque</div><div class="elem-info-val">${el.block.toUpperCase()}</div></div>
+        <div class="elem-info-item" style="grid-column:1/-1"><div class="elem-info-label">Configuración Electrónica</div><div class="elem-info-val" style="font-size:.8rem;color:var(--cyan)">${el.config}</div></div>
+      </div>
+    </div>`;
+
+  // If challenge active and this is the target
+  if(state.grade===10 && ptChallengeElem){
+    if(z === ptChallengeElem.z){
+      cell.classList.add('correct-pick');
+      document.getElementById('ch-result') && (document.getElementById('ch-result').className='ch-result ok show') && (document.getElementById('ch-result').innerHTML='✅ ¡Elemento correcto! Ahora completa los datos abajo.');
+    } else {
+      cell.classList.add('wrong-pick');
+      setTimeout(()=>cell.classList.remove('wrong-pick'),1500);
+    }
+  }
+}
+
+function newChallenge(){
+  // Pick a random element from pool
+  const idx = Math.floor(Math.random()*CHALLENGE_POOL.length);
+  ptChallengeElem = ELEM_BY_Z[CHALLENGE_POOL[idx]];
+  const el = ptChallengeElem;
+
+  // Clear previous highlights
+  document.querySelectorAll('.pt-cell').forEach(c=>{
+    c.classList.remove('selected','challenge-target','correct-pick','wrong-pick');
+  });
+
+  // Groups options
+  const groups = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','Serie f'];
+  const periods = ['1','2','3','4','5','6','7'];
+  const blocks = ['s','p','d','f'];
+
+  document.getElementById('challenge-body').innerHTML = `
+    <div class="config-display">${el.config}</div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem">
+      📍 Primero haz clic en el elemento correcto en la tabla de arriba, luego completa los campos:
+    </div>
+    <div class="challenge-inputs">
+      <div class="ch-input-wrap">
+        <label class="ch-input-label">Grupo</label>
+        <select class="ch-select" id="ch-group">
+          <option value="">— Selecciona —</option>
+          ${groups.map(g=>`<option value="${g}">${g}</option>`).join('')}
+        </select>
+      </div>
+      <div class="ch-input-wrap">
+        <label class="ch-input-label">Período</label>
+        <select class="ch-select" id="ch-period">
+          <option value="">— Selecciona —</option>
+          ${periods.map(p=>`<option value="${p}">${p}</option>`).join('')}
+        </select>
+      </div>
+      <div class="ch-input-wrap">
+        <label class="ch-input-label">Bloque</label>
+        <select class="ch-select" id="ch-block">
+          <option value="">— Selecciona —</option>
+          ${blocks.map(b=>`<option value="${b}">${b.toUpperCase()}</option>`).join('')}
+        </select>
+      </div>
+      <button class="ch-check-btn" onclick="checkChallenge()">⚡ VERIFICAR RESPUESTA</button>
+    </div>
+    <div class="ch-result" id="ch-result"></div>
+  `;
+  document.getElementById('pt-score-bar').style.display='flex';
+  updatePtScore();
+}
+
+function checkChallenge(){
+  const el = ptChallengeElem;
+  if(!el) return;
+
+  const gSel  = document.getElementById('ch-group').value;
+  const pSel  = document.getElementById('ch-period').value;
+  const bSel  = document.getElementById('ch-block').value;
+
+  if(!gSel||!pSel||!bSel){ toast('Completa todos los campos primero','⚠️'); return; }
+
+  const correctGroup  = el.group ? String(el.group) : 'Serie f';
+  const correctPeriod = String(Math.min(el.period,7));
+  const correctBlock  = el.block;
+
+  const gOk = gSel === correctGroup;
+  const pOk = pSel === correctPeriod;
+  const bOk = bSel.toLowerCase() === correctBlock;
+  const allOk = gOk && pOk && bOk;
+
+  // Style selects
+  document.getElementById('ch-group').className  = 'ch-select '+(gOk?'ok':'bad');
+  document.getElementById('ch-period').className = 'ch-select '+(pOk?'ok':'bad');
+  document.getElementById('ch-block').className  = 'ch-select '+(bOk?'ok':'bad');
+
+  // Highlight cell
+  document.querySelectorAll('.pt-cell').forEach(c=>c.classList.remove('challenge-target','correct-pick','wrong-pick'));
+  const cell = document.getElementById('ptc-'+el.z);
+  if(cell) cell.classList.add(allOk?'correct-pick':'wrong-pick');
+
+  ptAttempts++;
+  if(allOk){ ptScore++; spawnParticles(300,300,'correct'); }
+  updatePtScore();
+
+  const fb = document.getElementById('ch-result');
+  if(allOk){
+    fb.className='ch-result ok show';
+    fb.innerHTML=`✅ ¡Perfecto! <strong>${el.name}</strong> — Grupo ${correctGroup} · Período ${correctPeriod} · Bloque ${correctBlock.toUpperCase()}`;
+  } else {
+    fb.className='ch-result bad show';
+    fb.innerHTML=`❌ Incorrecto. <strong>${el.name}</strong>: Grupo <strong>${correctGroup}</strong> · Período <strong>${correctPeriod}</strong> · Bloque <strong>${correctBlock.toUpperCase()}</strong>`;
+  }
+
+  // Lock selects
+  ['ch-group','ch-period','ch-block'].forEach(id=>{ document.getElementById(id).disabled=true; });
+  document.querySelector('.ch-check-btn').disabled=true;
+  document.querySelector('.ch-check-btn').style.opacity='.4';
+}
+
+function updatePtScore(){
+  const sv = document.getElementById('pt-score-val');
+  const av = document.getElementById('pt-attempts-val');
+  if(sv) sv.textContent = ptScore;
+  if(av) av.textContent = ptAttempts;
+}
+
+const ACHIEVEMENTS = [
+  {id:"first",icon:"🌟",label:"Primera Lección",cond:s=>s.completedDays.length>=1},
+  {id:"streak3",icon:"🔥",label:"Racha 3 días",cond:s=>s.streak>=3},
+  {id:"perfect",icon:"💎",label:"Quiz Perfecto",cond:s=>s.perfectQuizzes>=1},
+  {id:"half",icon:"⚡",label:"Mitad del camino",cond:s=>s.completedDays.length>=3},
+  {id:"all",icon:"🏆",label:"¡Completado!",cond:s=>s.completedDays.length>=6},
+  {id:"scholar",icon:"🎓",label:"500 XP",cond:s=>s.totalXP>=500},
+];
+
+const XP_PER_LEVEL = [0,200,500,900,1400,2000,2700,3500,4400,5400,6500];
+
+// ══════════════════════════════════════
+// STATE & STORAGE
+// ══════════════════════════════════════
+const SAVE_KEY = "chemquest_v2";
+let state;
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw) state = JSON.parse(raw);
+  }catch(e){}
+  if(!state) state = {
+    grade:8,
+    totalXP:0,
+    level:1,
+    streak:0,
+    lastPlayDate:null,
+    completedDays:[],  // array of day ids
+    dayResults:{},     // {dayId: {score,stars,xp,date,answers}}
+    perfectQuizzes:0,
+    unlockedAch:[],
+  };
+}
+
+function saveState(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+// ══════════════════════════════════════
+// RUNTIME
+// ══════════════════════════════════════
+let currentDay = null;
+let currentSlide = 0;
+let currentQ = 0;
+let hearts = 3;
+let answers = [];
+let timerInterval = null;
+let timeLeft = 20;
+let quizStartTime = 0;
+let totalElapsed = 0;
+
+// ══════════════════════════════════════
+// STARS (background)
+// ══════════════════════════════════════
+function initStars(){
+  const c = document.getElementById('stars');
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
+  const ctx = c.getContext('2d');
+  for(let i=0;i<120;i++){
+    const x=Math.random()*c.width, y=Math.random()*c.height;
+    const r=Math.random()*1.2+.2;
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${Math.random()*.4+.05})`;
+    ctx.fill();
+  }
+}
+
+// ══════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════
+function spawnParticles(x, y, type){
+  const emojis = type==='correct' ? ['✨','⭐','💫','🌟'] : ['💥','❌','😮'];
+  for(let i=0;i<5;i++){
+    const p = document.createElement('div');
+    p.className='particle';
+    p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.left=(x+Math.random()*60-30)+'px';
+    p.style.top=(y+Math.random()*40-20)+'px';
+    p.style.animationDelay=(Math.random()*.3)+'s';
+    document.getElementById('particles').appendChild(p);
+    setTimeout(()=>p.remove(),4000);
+  }
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+function toast(msg, icon='', dur=2800){
+  const t=document.getElementById('toast');
+  t.innerHTML=`<span>${icon}</span><span>${msg}</span>`;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+// ══════════════════════════════════════
+// SCREEN SWITCH
+// ══════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function getPreferredScrollBehavior(){
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+}
+
+// Keep active content in view below sticky top bars after transitions.
+function focusPrimaryContent(selector){
+  requestAnimationFrame(()=>{
+    const target = document.querySelector(selector);
+    if(!target) return;
+
+    const stickyTopbar = document.querySelector(
+      '#screen-lesson.active .lesson-topbar, #screen-quiz.active .quiz-topbar, #screen-periodic.active .lesson-topbar'
+    );
+    const offset = (stickyTopbar ? stickyTopbar.offsetHeight : 0) + 16;
+    const top = Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset);
+
+    if(!target.hasAttribute('tabindex')) target.setAttribute('tabindex','-1');
+    target.focus({ preventScroll: true });
+    window.scrollTo({ top, behavior: getPreferredScrollBehavior() });
+  });
+}
+
+// ══════════════════════════════════════
+// HOME
+// ══════════════════════════════════════
+function goHome(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
+  showScreen('home');
+  renderHome();
+  focusPrimaryContent('.home-body');
+}
+
+function renderHome(){
+  updateStreak();
+  // Header stats
+  document.getElementById('hdr-xp').textContent = state.totalXP+' XP';
+  document.getElementById('hdr-streak').textContent = state.streak+' días';
+  document.getElementById('hdr-level').textContent = 'Nv. '+state.level;
+  // XP bar
+  const lvl = state.level;
+  const xpCur = state.totalXP - (XP_PER_LEVEL[lvl-1]||0);
+  const xpNxt = (XP_PER_LEVEL[lvl]||9999) - (XP_PER_LEVEL[lvl-1]||0);
+  const pct = Math.min(100, (xpCur/xpNxt)*100);
+  document.getElementById('xp-fill').style.width = pct+'%';
+  document.getElementById('xp-label').textContent = state.totalXP+' / '+(XP_PER_LEVEL[lvl]||'MAX')+' XP';
+  document.getElementById('level-num').textContent = lvl;
+  // Grade buttons
+  document.getElementById('btn-8').classList.toggle('active', state.grade===8);
+  document.getElementById('btn-10').classList.toggle('active', state.grade===10);
+  // Days map
+  const days = DAYS[state.grade];
+  const map = document.getElementById('days-map');
+  map.innerHTML = days.map((d,i)=>{
+    const done  = state.completedDays.includes(d.id);
+    const res   = state.dayResults[d.id];
+    // A day is unlocked if:
+    //   • it's the first day (i===0), OR
+    //   • the PREVIOUS day was completed with 3 stars
+    const prevRes   = i > 0 ? state.dayResults[days[i-1].id] : null;
+    const prevDone  = i > 0 ? state.completedDays.includes(days[i-1].id) : true;
+    const prevPerfect = prevRes && prevRes.stars === 3;
+    const locked = i > 0 && !(prevDone && prevPerfect);
+
+    const isToday  = !done && !locked;
+    const incomplete = done && res && res.stars < 3;
+    const perfect    = done && res && res.stars === 3;
+    const lostXP     = res ? res.lostXP || 0 : 0;
+    const stars      = res ? '★'.repeat(res.stars)+'☆'.repeat(3-res.stars) : '☆☆☆';
+    const starsColor = perfect ? d.color : incomplete ? 'var(--orange)' : 'var(--muted)';
+
+    // Lock message: distinguish "prev not done" vs "prev done but < 3 stars"
+    let lockMsg = '';
+    if(locked){
+      if(!prevDone) lockMsg = 'toast(\'Completa la lección anterior primero 🔒\',\'🔒\')';
+      else lockMsg = 'toast(\'Necesitas ⭐⭐⭐ en la lección anterior para continuar\',\'🌟\')';
+    }
+
+    return `<div class="day-node ${done?'completed':''} ${locked?'locked':''} ${isToday?'today':''} ${incomplete?'incomplete':''}"
+      style="--node-color:${incomplete?'var(--orange)':d.color}"
+      onclick="${locked ? lockMsg : 'startDay(\''+d.id+'\')'}">
+      ${perfect?'<div class="node-badge">✓</div>':''}
+      ${incomplete?`<div class="node-badge incomplete-badge">-${lostXP}XP</div>`:''}
+      <div class="node-day">DÍA ${d.day}</div>
+      <div class="node-icon">${locked&&!done?'🔒':incomplete?'⚠️':d.icon}</div>
+      <div class="node-title">${d.title}</div>
+      <div class="node-stars" style="color:${starsColor}">${stars}</div>
+      ${incomplete?'<div style="font-size:.6rem;color:var(--orange);margin-top:.3rem;font-family:var(--font-game)">REPETIR</div>':''}
+      ${locked&&prevDone&&!prevPerfect?'<div style="font-size:.55rem;color:var(--muted);margin-top:.3rem;font-family:var(--font-game);line-height:1.4">NECESITAS<br>⭐⭐⭐</div>':''}
+    </div>`;
+  }).join('');
+  // Achievements
+  const ach = document.getElementById('ach-strip');
+  ach.innerHTML = ACHIEVEMENTS.map(a=>{
+    const unlocked = state.unlockedAch.includes(a.id);
+    return `<div class="ach-badge ${unlocked?'unlocked':'locked'}">
+      <span class="ai">${a.icon}</span>${a.label}
+    </div>`;
+  }).join('');
+}
+
+function selectGrade(g){
+  state.grade = g;
+  saveState();
+  renderHome();
+}
+
+function updateStreak(){
+  const today = new Date().toDateString();
+  const last = state.lastPlayDate;
+  if(!last){ return; }
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  if(last !== today && last !== yesterday.toDateString()){
+    state.streak = 0; saveState();
+  }
+}
+
+// ══════════════════════════════════════
+// LESSON
+// ══════════════════════════════════════
+function startDay(dayId){
+  const days = DAYS[state.grade];
+  currentDay = days.find(d=>d.id===dayId);
+  if(!currentDay) return;
+  currentSlide = 0;
+  hearts = 3;
+  answers = [];
+  currentQ = 0;
+  totalElapsed = 0;
+  showScreen('lesson');
+  renderSlide();
+}
+
+function renderSlide(){
+  const slides = currentDay.slides;
+  const pct = ((currentSlide) / (slides.length + currentDay.quiz.length)) * 100;
+  document.getElementById('lesson-prog').style.width = pct+'%';
+  document.getElementById('lesson-label').textContent = currentDay.title.toUpperCase();
+  renderHearts('lesson-hearts');
+
+  const s = slides[currentSlide];
+  const imgBlock = s.img
+    ? `<div class="slide-img-wrap">${s.img}<div class="slide-img-caption">${s.imgCaption||''}</div></div>`
+    : `<div class="slide-visual">${s.visual}</div>`;
+
+  document.getElementById('lesson-content').innerHTML = `
+    <div class="slide-card">
+      <div class="slide-eyebrow">📖 LECCIÓN ${currentSlide+1} / ${slides.length}</div>
+      <div class="slide-title">${s.title}</div>
+      ${imgBlock}
+      <div class="slide-text">${s.text}</div>
+      <div class="highlight-box"><span class="hb-icon"></span>${s.highlight}</div>
+      <div class="formula-row">${s.formulas.map(f=>`<div class="f-chip">${f}</div>`).join('')}</div>
+      <button class="next-btn" onclick="nextSlide()">
+        ${currentSlide < slides.length-1 ? '→ SIGUIENTE' : '¡EMPEZAR CUESTIONARIO! ⚡'}
+      </button>
+    </div>
+  `;
+
+  focusPrimaryContent('#screen-lesson .slide-card');
+}
+
+function nextSlide(){
+  currentSlide++;
+  if(currentSlide < currentDay.slides.length){
+    renderSlide();
+  } else {
+    showScreen('quiz');
+    quizStartTime = Date.now();
+    renderQuestion();
+  }
+}
+
+function renderHearts(containerId){
+  const c = document.getElementById(containerId);
+  if(c) c.innerHTML = '❤️'.repeat(hearts)+'🖤'.repeat(3-hearts);
+}
+
+// ══════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════
+function renderQuestion(){
+  const q = currentDay.quiz[currentQ];
+  const slides = currentDay.slides;
+  const total = slides.length + currentDay.quiz.length;
+  const pct = ((slides.length + currentQ) / total) * 100;
+
+  document.getElementById('q-num').textContent = currentQ+1;
+  renderHearts('quiz-hearts');
+  startTimer();
+
+  const letters = ['A','B','C','D'];
+  document.getElementById('question-card').innerHTML = `
+    <div class="q-number">⚡ PREGUNTA ${currentQ+1} DE 5</div>
+    <div class="q-text">${q.q}</div>
+    ${q.visual ? `<div class="q-visual">${q.visual}</div>` : ''}
+    <div class="options-grid">
+      ${q.opts.map((o,i)=>`
+        <button class="opt-btn" id="opt-${i}" onclick="answerQ(${i})">
+          <span class="opt-letter">${letters[i]}</span>${o}
+        </button>
+      `).join('')}
+    </div>
+    <div class="quiz-feedback feedback-bar" id="q-fb"></div>
+    <button class="continue-btn" id="continue-btn" onclick="nextQuestion()">CONTINUAR →</button>
+  `;
+
+  focusPrimaryContent('#screen-quiz .question-card');
+}
+
+function startTimer(){
+  if(timerInterval) clearInterval(timerInterval);
+  timeLeft = 20;
+  const circle = document.getElementById('timer-circle');
+  const num = document.getElementById('timer-num');
+  const circumference = 113;
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    num.textContent = timeLeft;
+    const offset = circumference - (timeLeft/20)*circumference;
+    circle.style.strokeDashoffset = offset;
+    if(timeLeft<=5){ circle.style.stroke='var(--red)'; num.style.color='var(--red)'; }
+    if(timeLeft<=0){
+      clearInterval(timerInterval);
+      if(!document.getElementById('continue-btn').classList.contains('show')){
+        timeUpAnswer();
+      }
+    }
+  },1000);
+}
+
+function timeUpAnswer(){
+  const q = currentDay.quiz[currentQ];
+  clearInterval(timerInterval);
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  document.getElementById('opt-'+q.c).classList.add('correct');
+  const fb = document.getElementById('q-fb');
+  fb.className='quiz-feedback feedback-bar bad show';
+  fb.innerHTML='⏱️ ¡Se acabó el tiempo! La respuesta correcta está en verde.';
+  hearts = Math.max(0, hearts-1);
+  renderHearts('quiz-hearts');
+  answers.push({correct:false, timedOut:true});
+  totalElapsed += 20;
+  document.getElementById('continue-btn').classList.add('show');
+}
+
+function answerQ(idx){
+  if(timerInterval) clearInterval(timerInterval);
+  const elapsed = 20 - timeLeft;
+  totalElapsed += elapsed;
+  const q = currentDay.quiz[currentQ];
+  const isCorrect = idx === q.c;
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  document.getElementById('opt-'+idx).classList.add(isCorrect?'correct':'wrong');
+  if(!isCorrect){ document.getElementById('opt-'+q.c).classList.add('correct'); }
+  const fb = document.getElementById('q-fb');
+  fb.className = `quiz-feedback feedback-bar ${isCorrect?'ok':'bad'} show`;
+  fb.innerHTML = isCorrect
+    ? `✅ ¡Correcto! ${q.ex}`
+    : `❌ Incorrecto. ${q.ex}`;
+  answers.push({idx, correct:isCorrect});
+  if(!isCorrect){ hearts=Math.max(0,hearts-1); renderHearts('quiz-hearts'); }
+  // particles
+  const btn = document.getElementById('opt-'+idx);
+  const rect = btn.getBoundingClientRect();
+  spawnParticles(rect.left+rect.width/2, rect.top, isCorrect?'correct':'wrong');
+  document.getElementById('continue-btn').classList.add('show');
+}
+
+function nextQuestion(){
+  currentQ++;
+  if(currentQ < currentDay.quiz.length){
+    renderQuestion();
+  } else {
+    finishQuiz();
+  }
+}
+
+// ══════════════════════════════════════
+// FINISH
+// ══════════════════════════════════════
+// XP table: stars → base XP earned (out of max 200)
+// Max XP per lesson = 5×30 + 50 perfect bonus + 20 all-stars bonus = 220
+// Penalty: if stars < 3, student gets xpEarned but loses (maxXP - xpEarned) potential
+// On retry with better stars, receives the DIFFERENCE + a 25 XP recovery bonus
+const MAX_XP_LESSON = 220;
+
+function finishQuiz(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
+  const correct = answers.filter(a=>a.correct).length;
+  const stars = correct<=1?1:correct<=3?2:3;
+  const isPerfect = correct===5;
+  const xpEarned = correct*30 + (isPerfect?50:0) + (stars===3?20:0);
+  const lostXP = stars < 3 ? MAX_XP_LESSON - xpEarned : 0;
+
+  const dayId = currentDay.id;
+  const prevResult = state.dayResults[dayId];
+  const isFirst = !state.completedDays.includes(dayId);
+
+  let xpAwarded = 0;       // XP actually added this attempt
+  let recoveredXP = 0;     // XP recovered on retry
+  let recoveryBonus = 0;   // bonus for improving
+
+  if(isFirst){
+    // First attempt — always award, even if incomplete
+    state.completedDays.push(dayId);
+    xpAwarded = xpEarned;
+    state.totalXP += xpAwarded;
+    const today = new Date().toDateString();
+    if(state.lastPlayDate !== today){
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+      state.streak = state.lastPlayDate===yesterday.toDateString() ? state.streak+1 : 1;
+      state.lastPlayDate = today;
+    }
+  } else {
+    // Retry attempt
+    const prevStars = prevResult?.stars || 0;
+    const prevXP    = prevResult?.xp    || 0;
+    if(stars > prevStars){
+      // Improved! Recover the XP difference + recovery bonus
+      recoveredXP  = xpEarned - prevXP;
+      recoveryBonus = 25;
+      xpAwarded = recoveredXP + recoveryBonus;
+      state.totalXP += xpAwarded;
+    }
+    // Same or worse: no XP change, no penalty (already penalised on first run)
+  }
+
+  if(isPerfect && !prevResult?.perfect) state.perfectQuizzes++;
+
+  state.dayResults[dayId] = {
+    score:correct, stars, xp:xpEarned, lostXP: stars<3 ? lostXP : 0,
+    perfect:isPerfect,
+    date:new Date().toLocaleDateString('es'),
+    answers, timeSeconds: Math.round(totalElapsed)
+  };
+
+  // Level up check
+  const oldLevel = state.level;
+  while(state.level < XP_PER_LEVEL.length-1 && state.totalXP >= XP_PER_LEVEL[state.level]){
+    state.level++;
+  }
+  const leveled = state.level > oldLevel;
+
+  // Check achievements
+  const newAch = ACHIEVEMENTS.filter(a=>!state.unlockedAch.includes(a.id)&&a.cond(state));
+  newAch.forEach(a=>state.unlockedAch.push(a.id));
+  saveState();
+
+  showScreen('results');
+  renderResults(correct, stars, xpEarned, xpAwarded, lostXP, recoveredXP, recoveryBonus, isPerfect, isFirst, newAch);
+
+  if(leveled){
+    setTimeout(()=>{
+      document.getElementById('new-level').textContent = state.level;
+      document.getElementById('levelup-overlay').classList.add('show');
+    }, 2000);
+  }
+  if(newAch.length) setTimeout(()=>toast('🏅 ¡Logro desbloqueado: '+newAch[0].label+'!','🎉',3500),1500);
+}
+
+function renderResults(correct, stars, xpEarned, xpAwarded, lostXP, recoveredXP, recoveryBonus, isPerfect, isFirst, newAch){
+  const trophy = isPerfect?'🏆':stars===3?'🥇':stars===2?'🥈':'🥉';
+  const title   = isPerfect?'¡PERFECTO!':stars===3?'¡EXCELENTE!':stars===2?'¡BIEN HECHO!':'COMPLETADO';
+  const sub     = isPerfect
+    ? '¡5/5 respuestas correctas! ¡Imparable!'
+    : `${correct} de 5 respuestas correctas.`;
+
+  // Stars breakdown labels
+  const starMeta = [
+    {threshold:2, label:'1 ★ — Básico',  note:'1-2 correctas'},
+    {threshold:4, label:'2 ★ — Bueno',   note:'3-4 correctas'},
+    {threshold:5, label:'3 ★ — Perfecto', note:'5 correctas'},
+  ];
+
+  // Penalty / recovery block
+  let extraBlock = '';
+  if(isFirst && stars < 3){
+    extraBlock = `
+      <div class="xp-penalty-box">
+        <div class="xp-penalty-icon">⚠️</div>
+        <div>
+          <div class="xp-penalty-title">XP NO RECUPERADO</div>
+          <div class="xp-penalty-text">
+            No llegaste a <strong>3 estrellas</strong>. Puedes avanzar, pero dejaste
+            <span class="xp-penalty-num">−${lostXP} XP</span> sobre la mesa.<br>
+            <strong>Repite esta lección</strong> para recuperarlos + un bonus de recuperación.
+          </div>
+        </div>
+      </div>`;
+  } else if(!isFirst && recoveredXP > 0){
+    extraBlock = `
+      <div class="recovery-box">
+        <div style="font-size:1.6rem">🔄</div>
+        <div>
+          <div class="recovery-title">¡XP RECUPERADO!</div>
+          <div class="recovery-text">
+            Mejoraste tu resultado. Recuperaste
+            <span class="recovery-num">+${recoveredXP} XP</span>
+            y obtuviste un bonus de recuperación de
+            <span class="recovery-num">+${recoveryBonus} XP</span>.
+            <br>Total ganado esta vez: <span class="recovery-num">+${recoveredXP+recoveryBonus} XP</span> 🎉
+          </div>
+        </div>
+      </div>`;
+  } else if(!isFirst && recoveredXP === 0 && stars <= (state.dayResults[currentDay.id]?.stars||0)){
+    extraBlock = `
+      <div class="xp-penalty-box" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.05)">
+        <div class="xp-penalty-icon">😐</div>
+        <div>
+          <div class="xp-penalty-title" style="color:var(--muted)">SIN MEJORA</div>
+          <div class="xp-penalty-text">
+            No mejoraste tu puntaje anterior, así que no se otorga XP extra.<br>
+            ¡Repasa los temas de la lección e inténtalo de nuevo!
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Next lesson button logic
+  const allDays  = DAYS[state.grade];
+  const dayIdx   = allDays.findIndex(d => d.id === currentDay.id);
+  const nextDay  = allDays[dayIdx + 1];
+  const justUnlocked = stars === 3 && nextDay;
+
+  // History
+  const history = allDays
+    .filter(d=>state.dayResults[d.id])
+    .slice(-5).reverse()
+    .map(d=>{
+      const r = state.dayResults[d.id];
+      const inc = r.stars < 3;
+      return `<div class="history-item">
+        <span>${inc?'⚠️':d.icon}</span>
+        <span style="${inc?'color:var(--orange)':''}">${d.title}</span>
+        <span class="history-stars" style="color:${inc?'var(--orange)':'#fbbf24'}">${'★'.repeat(r.stars)+'☆'.repeat(3-r.stars)}</span>
+        <span class="history-xp" style="${inc?'color:var(--red)':''}">+${r.xp} XP${inc?' ⚠':'✓'}</span>
+        <span class="history-date">${r.date}</span>
+      </div>`;
+    }).join('');
+
+  const qReview = currentDay.quiz.map((q,i)=>{
+    const a = answers[i];
+    const ok = a?.correct;
+    return `<div class="q-review-item ${ok?'correct':'wrong'}">
+      <div class="q-review-dot"></div>
+      <div class="q-review-text">${q.q}</div>
+      <div class="q-review-mark">${ok?'✅':'❌'}</div>
+    </div>`;
+  }).join('');
+
+  // Stars breakdown
+  const breakdown = starMeta.map(m=>{
+    const earned = stars >= starMeta.indexOf(m)+1;
+    return `<div class="star-item ${earned?'earned':''}">
+      ${earned?'★':'☆'} ${m.label} <span style="font-size:.65rem;opacity:.6">(${m.note})</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('results-card').innerHTML = `
+    <div class="result-trophy">${trophy}</div>
+    <div class="result-grade">${state.grade}° GRADO · ${currentDay.title.toUpperCase()}</div>
+    <div class="result-title">${title}</div>
+    <div class="result-subtitle">${sub}</div>
+    <div class="stars-display" style="color:${stars<3?'var(--orange)':'#fbbf24'}">${'★'.repeat(stars)+'☆'.repeat(3-stars)}</div>
+    <div class="stars-breakdown">${breakdown}</div>
+    <div class="score-display">
+      <div class="score-item">
+        <div class="score-val xp">+${xpAwarded}</div>
+        <div class="score-lbl">XP Esta vez</div>
+      </div>
+      <div class="score-item">
+        <div class="score-val hits">${correct}/5</div>
+        <div class="score-lbl">Correctas</div>
+      </div>
+      <div class="score-item">
+        <div class="score-val time">${Math.round(totalElapsed)}s</div>
+        <div class="score-lbl">Tiempo</div>
+      </div>
+    </div>
+    ${extraBlock}
+    <div class="q-review">${qReview}</div>
+    ${history ? `<div class="history-title">📋 Historial de lecciones</div>
+    <div class="history-list">${history}</div>` : ''}
+    <div class="action-btns">
+      <button class="action-btn primary" onclick="goHome()">🏠 INICIO</button>
+      ${justUnlocked
+        ? `<button class="action-btn primary"
+             style="background:linear-gradient(135deg,var(--green),var(--cyan));animation:glowPulse 1.5s ease-in-out infinite"
+             onclick="startDay('${nextDay.id}')">
+             ${nextDay.icon} SIGUIENTE →
+           </button>`
+        : `<button class="action-btn ${stars<3?'primary':'secondary'}"
+             style="${stars<3?'background:linear-gradient(135deg,var(--orange),var(--yellow));':''}"
+             onclick="startDay('${currentDay.id}')">
+             ${stars<3?'⚡ RECUPERAR XP':'🔄 REPETIR'}
+           </button>`
+      }
+    </div>
+    ${justUnlocked ? `
+      <div style="margin-top:.75rem;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.25);border-radius:12px;padding:.75rem 1rem;font-size:.8rem;color:var(--green);font-family:var(--font-game);letter-spacing:.05em;text-align:center">
+        🔓 ¡LECCIÓN ${nextDay.day} DESBLOQUEADA! — ${nextDay.title}
+      </div>` : stars < 3 ? `
+      <div style="margin-top:.75rem;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.25);border-radius:12px;padding:.75rem 1rem;font-size:.78rem;color:var(--orange);text-align:center;line-height:1.6">
+        🔒 La siguiente lección se desbloqueará cuando obtengas <strong>⭐⭐⭐</strong> aquí.<br>
+        <span style="font-size:.7rem;opacity:.7">Repite y mejora tu puntaje para continuar.</span>
+      </div>` : ''
+    }
+  `;
+
+  focusPrimaryContent('#screen-results .results-card');
+}
+
+function closeLevelUp(){
+  document.getElementById('levelup-overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.addEventListener('resize',()=>{
+  const c=document.getElementById('stars');
+  c.width=window.innerWidth;c.height=window.innerHeight;
+  initStars();
+});
+loadState();
+initStars();
+renderHome();
+</script>
+</body>
+</html>
