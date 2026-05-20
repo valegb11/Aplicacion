@@ -1099,6 +1099,164 @@ const DAYS = {
         {q:"¿Qué se produce cuando CaO reacciona con agua?",opts:["CaCl₂","Ca(OH)₂","CaCO₃","CaSO₄"],c:1,ex:"CaO + H₂O → Ca(OH)₂ (hidróxido de calcio / cal apagada). Óxido básico + agua → hidróxido."}
       ]
     }
+  ],
+  10: [
+    {
+      id:"d10-1", day:1, icon:"🌌", title:"La Materia", color:"#a78bfa",
+      slides:[
+        {
+          title:"Clasificación de la Materia",
+          visual:"Elemento | Compuesto | Mezcla",
+          text:"La materia se clasifica en <strong>sustancias puras</strong> (elementos y compuestos) y <strong>mezclas</strong> (homogéneas y heterogéneas). Esta clasificación permite predecir métodos de separación y comportamiento químico.",
+          highlight:"📚 Sustancia pura: composición fija (Au, H₂O). Mezcla: composición variable (aire, agua salada).",
+          formulas:["Pura: elemento/compuesto","Mezcla homogénea","Mezcla heterogénea"]
+        },
+        {
+          title:"Propiedades y Cambios",
+          visual:"Físico vs Químico",
+          text:"Las propiedades de la materia pueden ser <strong>físicas</strong> (densidad, punto de fusión, solubilidad) o <strong>químicas</strong> (reactividad, inflamabilidad, poder oxidante). Los cambios físicos no alteran composición; los químicos sí.",
+          highlight:"⚖️ Cambio de estado = físico. Combustión o oxidación = químico.",
+          formulas:["D = m / V","Cambio físico ≠ sustancia nueva","Cambio químico = sustancia nueva"]
+        }
+      ],
+      quiz:[
+        {q:"¿Cuál opción representa una mezcla heterogénea?",opts:["Aire","Agua con sal totalmente disuelta","Granito","Oxígeno gaseoso"],c:2,ex:"El granito presenta fases visibles distintas, por eso es heterogéneo."},
+        {q:"¿Qué propiedad es química?",opts:["Densidad","Punto de ebullición","Inflamabilidad","Masa"],c:2,ex:"La inflamabilidad implica transformación de la sustancia, por eso es química."},
+        {q:"¿Qué método separa sal y agua en una mezcla homogénea?",opts:["Filtración","Destilación/evaporación","Tamizado","Imantación"],c:1,ex:"La sal disuelta se separa por evaporación o destilación, no por filtración."},
+        {q:"¿Cuál ejemplo es una sustancia pura compuesta?",opts:["Fe","H₂O","Aire","Leche"],c:1,ex:"H₂O es un compuesto con proporción fija de H y O."},
+        {q:"Si una sustancia cambia de sólido a líquido, ocurrió...",opts:["Cambio químico","Oxidación","Cambio físico","Combustión"],c:2,ex:"La fusión no cambia la composición química, solo el estado."}
+      ]
+    },
+    {
+      id:"d10-2", day:2, icon:"🧬", title:"El Átomo", color:"#22d3ee",
+      slides:[
+        {
+          title:"Modelos Atómicos y Estructura",
+          visual:"Thomson → Rutherford → Bohr → Cuántico",
+          text:"El átomo se explica por una evolución de modelos: Thomson propuso carga positiva difusa, Rutherford introdujo un núcleo denso, Bohr órbitas cuantizadas y el modelo cuántico actual orbitales de probabilidad.",
+          highlight:"🧠 El número atómico Z define el elemento; el número másico A = Z + N.",
+          formulas:["Z = protones","A = Z + N","N = A - Z"]
+        },
+        {
+          title:"Isótopos y Configuración Electrónica",
+          visual:"1s² 2s² 2p⁶ ...",
+          text:"Los <strong>isótopos</strong> son átomos del mismo elemento (igual Z) con diferente número de neutrones. La configuración electrónica sigue Aufbau y permite inferir valencia y reactividad.",
+          highlight:"🔬 Oxígeno (Z=8): 1s² 2s² 2p⁴. Tiene 6 electrones de valencia y tendencia a formar 2 enlaces.",
+          formulas:["O: 1s² 2s² 2p⁴","Valencia ligada a e⁻ externos","Isótopos: mismo Z, distinto N"]
+        }
+      ],
+      quiz:[
+        {q:"¿Qué aportó Rutherford frente al modelo de Thomson?",opts:["Electrones fijos en capas","Núcleo pequeño y denso","Orbitales híbridos","Regla del octeto"],c:1,ex:"Rutherford demostró que casi toda la masa y carga positiva están en un núcleo."},
+        {q:"¿Qué define el número atómico Z?",opts:["Neutrones","Electrones de valencia","Protones","Masa atómica promedio"],c:2,ex:"Z corresponde al número de protones y define el elemento."},
+        {q:"¿Qué son isótopos?",opts:["Mismo A y distinto Z","Mismo Z y distinto N","Distinto Z y distinto N","Iones de un átomo"],c:1,ex:"Los isótopos comparten Z pero tienen diferente cantidad de neutrones."},
+        {q:"Configuración correcta para O (Z=8):",opts:["1s² 2s² 2p⁴","1s² 2s² 2p⁶","1s² 2p⁶","1s² 2s¹ 2p⁵"],c:0,ex:"Oxígeno tiene 8 electrones: 1s² 2s² 2p⁴."},
+        {q:"¿Por qué elementos en la misma columna tienen propiedades similares?",opts:["Misma masa","Mismo número de neutrones","Mismo número de electrones de valencia","Misma fase"],c:2,ex:"La química de un elemento depende principalmente de sus electrones de valencia."}
+      ]
+    },
+    {
+      id:"d10-3", day:3, icon:"⚙️", title:"Enlaces Químicos", color:"#4ade80",
+      slides:[
+        {
+          title:"Iónico, Covalente y Metálico",
+          visual:"NaCl | CO₂ | Fe",
+          text:"El enlace <strong>iónico</strong> implica transferencia de electrones (metal-no metal). El <strong>covalente</strong> comparte pares electrónicos (no metales). El <strong>metálico</strong> presenta electrones deslocalizados en una red de cationes.",
+          highlight:"⚡ El enlace metálico explica conductividad y maleabilidad en metales.",
+          formulas:["Iónico: Na⁺ + Cl⁻","Covalente: O=O, N≡N","Metálico: e⁻ deslocalizados"]
+        },
+        {
+          title:"Electronegatividad y Polaridad",
+          visual:"ΔEN define tipo de enlace",
+          text:"La diferencia de electronegatividad permite estimar el tipo de enlace: iónico cuando ΔEN es grande, covalente polar cuando es intermedia, y covalente no polar cuando es pequeña.",
+          highlight:"📏 Criterio usado: ΔEN > 1.7 iónico, 0.4-1.7 covalente polar, < 0.4 covalente no polar.",
+          formulas:["ΔEN > 1.7 → iónico","0.4 < ΔEN < 1.7 → polar","ΔEN < 0.4 → no polar"]
+        }
+      ],
+      quiz:[
+        {q:"¿Cómo se forma un catión?",opts:["Gana electrones","Pierde protones","Pierde electrones","Gana neutrones"],c:2,ex:"Un catión tiene carga positiva porque perdió uno o más electrones."},
+        {q:"¿Por qué CO₂ es covalente y no iónico?",opts:["Porque incluye un metal","Porque C y O son no metales","Porque es gas","Porque no tiene carga"],c:1,ex:"Al ser no metales, carbono y oxígeno comparten electrones."},
+        {q:"Si ΔEN = 2.0, el enlace tiende a ser...",opts:["Metálico","Covalente no polar","Covalente polar","Iónico"],c:3,ex:"Una diferencia grande de electronegatividad favorece transferencia electrónica (iónico)."},
+        {q:"¿Qué explica la conductividad eléctrica en metales?",opts:["Iones inmóviles","Electrones deslocalizados","Puentes de hidrógeno","Alta masa"],c:1,ex:"En metales, los electrones móviles transportan carga eléctrica."},
+        {q:"¿Cuál compuesto suele tener mayor punto de fusión?",opts:["Covalente molecular","Iónico cristalino","Gas noble","Sustancia apolar"],c:1,ex:"Las redes iónicas tienen interacciones electrostáticas fuertes, por eso funden a alta T."}
+      ]
+    },
+    {
+      id:"d10-4", day:4, icon:"⚛️", title:"Ácidos y Bases", color:"#fb923c",
+      slides:[
+        {
+          title:"Teorías Ácido-Base",
+          visual:"Arrhenius | Bronsted-Lowry | Lewis",
+          text:"Arrhenius: ácido libera H⁺ y base libera OH⁻ en agua. Bronsted-Lowry: ácido dona protones y base los acepta. Lewis: ácido acepta par electrónico y base lo dona.",
+          highlight:"🧪 Cada teoría amplía la anterior y permite explicar más reacciones químicas.",
+          formulas:["Arrhenius: H⁺ / OH⁻","Bronsted: dona/acepta H⁺","Lewis: acepta/dona e⁻"]
+        },
+        {
+          title:"pH, pOH y Soluciones Tampón",
+          visual:"pH = -log[H⁺]",
+          text:"El pH cuantifica acidez: pH = -log[H⁺]. A 25°C se cumple pH + pOH = 14. Los tampones (buffers) resisten cambios bruscos de pH, como el sistema H₂CO₃/HCO₃⁻ en sangre.",
+          highlight:"🩸 El buffer bicarbonato ayuda a mantener el pH sanguíneo cerca de 7.4.",
+          formulas:["pH = -log[H⁺]","pH + pOH = 14","HCl + NaOH → NaCl + H₂O"]
+        }
+      ],
+      quiz:[
+        {q:"Diferencia clave entre Arrhenius y Bronsted-Lowry:",opts:["Arrhenius requiere agua; Bronsted usa transferencia de H⁺","Son idénticas","Bronsted solo aplica a bases fuertes","Arrhenius no usa protones"],c:0,ex:"Arrhenius se limita al medio acuoso, Bronsted-Lowry se basa en donación/aceptación de protones."},
+        {q:"Si [H⁺] = 10^-3 M, el pH es...",opts:["3","11","7","1"],c:0,ex:"pH = -log(10^-3) = 3, por tanto es ácido."},
+        {q:"¿Qué describe una neutralización?",opts:["Base + sal","Ácido + base → sal + agua","Oxidación total","Precipitación de gas"],c:1,ex:"En una neutralización se combinan H⁺ y OH⁻ para formar agua."},
+        {q:"¿Para qué sirve un tampón químico?",opts:["Aumentar pH siempre","Reducir temperatura","Resistir cambios de pH","Oxidar compuestos"],c:2,ex:"Un buffer mantiene pH relativamente constante ante pequeñas adiciones de ácido/base."},
+        {q:"CO₂ disuelto en agua puede formar...",opts:["Una base fuerte","Ácido carbónico","Hidróxido de calcio","Cloruro"],c:1,ex:"CO₂ + H₂O forma H₂CO₃, lo que acidifica el medio acuoso."}
+      ]
+    },
+    {
+      id:"d10-5", day:5, icon:"🔥", title:"Reacciones Químicas", color:"#f472b6",
+      slides:[
+        {
+          title:"Clasificación y Energía de Activación",
+          visual:"Síntesis | Descomposición | Desplazamiento | Combustión",
+          text:"Las reacciones se clasifican en síntesis, descomposición, desplazamiento simple, doble desplazamiento y combustión. Para que ocurran, deben superar una <strong>energía de activación</strong> mínima.",
+          highlight:"⚡ Un catalizador reduce la energía de activación sin consumirse y acelera la reacción.",
+          formulas:["Ea: barrera energética","Catalizador: baja Ea","2H₂O → 2H₂ + O₂"]
+        },
+        {
+          title:"Velocidad y Termoquímica",
+          visual:"Temperatura, concentración, superficie",
+          text:"La velocidad depende de temperatura, concentración, superficie de contacto y catalizadores. En termoquímica: reacción exotérmica (ΔH < 0) libera calor; endotérmica (ΔH > 0) absorbe calor.",
+          highlight:"🌡️ A mayor temperatura, mayor frecuencia de colisiones efectivas y mayor velocidad de reacción.",
+          formulas:["Exotérmica: ΔH < 0","Endotérmica: ΔH > 0","v ↑ con T y concentración"]
+        }
+      ],
+      quiz:[
+        {q:"La reacción 2H₂O → 2H₂ + O₂ se clasifica como...",opts:["Síntesis","Descomposición","Combustión","Doble desplazamiento"],c:1,ex:"Un compuesto se separa en sustancias más simples: descomposición."},
+        {q:"¿Qué hace un catalizador?",opts:["Aumenta ΔH","Disminuye la Ea","Se consume totalmente","Detiene la reacción"],c:1,ex:"El catalizador ofrece una ruta alternativa con menor energía de activación."},
+        {q:"¿Por qué los alimentos se descomponen más lento en nevera?",opts:["Menor oxígeno","Menor temperatura reduce velocidad","Mayor presión","Menor masa"],c:1,ex:"A menor temperatura disminuyen las colisiones eficaces y la reacción se hace más lenta."},
+        {q:"Una reacción que libera calor tiene...",opts:["ΔH > 0","ΔH = 0","ΔH < 0","No tiene entalpía"],c:2,ex:"Liberar calor al entorno corresponde a una reacción exotérmica con ΔH negativo."},
+        {q:"¿Qué ocurre al aumentar concentración de reactivos?",opts:["Disminuye colisiones","Aumenta velocidad de reacción","No cambia nada","Baja la Ea"],c:1,ex:"Más partículas por volumen generan más colisiones por unidad de tiempo."}
+      ]
+    },
+    {
+      id:"d10-6", day:6, icon:"🌊", title:"Compuestos Inorgánicos", color:"#a78bfa",
+      slides:[
+        {
+          title:"Clasificación Avanzada",
+          visual:"Óxidos | Hidróxidos | Ácidos | Sales",
+          text:"Los compuestos inorgánicos se organizan como óxidos básicos, óxidos ácidos, hidróxidos, oxoácidos, hidrácidos y sales. Esta clasificación se basa en composición y comportamiento químico.",
+          highlight:"🧱 Ejemplos: Fe₂O₃ (óxido básico), SO₃ (óxido ácido), Ca(OH)₂ (hidróxido), H₂SO₄ (oxoácido), HCl (hidrácido).",
+          formulas:["Metal + O₂ → óxido básico","No metal + O₂ → óxido ácido","Ácido + base → sal + agua"]
+        },
+        {
+          title:"Nomenclatura Stock e IUPAC",
+          visual:"FeCl₂ = cloruro de hierro (II)",
+          text:"En nomenclatura Stock se indica el estado de oxidación del metal con números romanos. La nomenclatura sistemática/IUPAC busca nombres consistentes para fórmulas inorgánicas.",
+          highlight:"📝 Diferenciar oxoácidos de hidrácidos es clave: H₂SO₄ (con oxígeno) vs HCl (sin oxígeno).",
+          formulas:["FeCl₂: hierro (II)","FeCl₃: hierro (III)","H₂SO₄: ácido sulfúrico"]
+        }
+      ],
+      quiz:[
+        {q:"¿Qué diferencia principal hay entre oxoácido e hidrácido?",opts:["Estado sólido o líquido","Presencia de oxígeno en el oxoácido","Cantidad de hidrógeno","Si proviene de metal"],c:1,ex:"Los oxoácidos contienen oxígeno; los hidrácidos no."},
+        {q:"Nombre Stock de FeCl₂:",opts:["Cloruro de hierro (III)","Cloruro de hierro (II)","Dicloruro de hierro","Cloruro férrico"],c:1,ex:"Fe en FeCl₂ tiene estado +2, por eso es hierro (II)."},
+        {q:"¿Cuál es un óxido ácido?",opts:["CaO","Na₂O","SO₃","MgO"],c:2,ex:"SO₃ es óxido de no metal y se comporta como anhídrido ácido."},
+        {q:"Una sal se forma típicamente por...",opts:["Metal + metal","Ácido + base","Óxido + óxido","No metal + no metal"],c:1,ex:"La neutralización ácido-base produce sal y agua."},
+        {q:"¿Por qué CaO es óxido básico?",opts:["Porque contiene hidrógeno","Porque proviene de un metal","Porque no reacciona","Porque tiene doble enlace"],c:1,ex:"Los óxidos de metales suelen ser básicos y forman hidróxidos con agua."}
+      ]
+    }
   ]
 };
 // ── SVG IMAGES ────────────────────────────────────────────────────
@@ -1279,13 +1437,6 @@ DAYS[8][2].slides[0].img = SVGS.enlace;          DAYS[8][2].slides[0].imgCaption
 DAYS[8][3].slides[0].img = SVGS.ph;              DAYS[8][3].slides[0].imgCaption = "ESCALA DE pH — De 0 (muy ácido) a 14 (muy básico)";
 DAYS[8][4].slides[0].img = SVGS.reaccion;        DAYS[8][4].slides[0].imgCaption = "REACCIÓN QUÍMICA — Reactivos → Productos";
 DAYS[8][5].slides[0].img = SVGS.compuestos;      DAYS[8][5].slides[0].imgCaption = "FAMILIAS INORGÁNICAS — Óxidos, Ácidos, Hidróxidos, Sales";
-
-// Grade 10: same days with advanced label + same images
-DAYS[10] = DAYS[8].map(d=>({...d, id:d.id.replace('d8','d10'),
-  slides:d.slides.map(s=>({...s,
-    text:s.text+' <span style="color:var(--purple);font-size:.85rem">[Nivel Avanzado: analiza a profundidad molecular]</span>'
-  }))
-}));
 
 // ── PERIODIC TABLE DATA ────────────────────────────────────────────
 // Full 118 elements: [Z, Symbol, Name, Group, Period, Block, Mass, Config, Color-category]
@@ -1632,7 +1783,7 @@ const XP_PER_LEVEL = [0,200,500,900,1400,2000,2700,3500,4400,5400,6500];
 // ══════════════════════════════════════
 // STATE & STORAGE
 // ══════════════════════════════════════
-const SAVE_KEY = "chemquest_v2";
+const SAVE_KEY = "chemquest_v3";
 let state;
 
 function loadState(){
@@ -1824,6 +1975,8 @@ function selectGrade(g){
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
   });
+  // Forzar recarga para asegurar que se visualizan los cambios de grado
+  setTimeout(()=>{ location.reload(); }, 500);
 }
 
 function updateStreak(){

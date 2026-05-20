@@ -39,14 +39,19 @@ Cada lección tiene:
 2. **Desafío tabla periódica** (solo grado 10, antes del quiz)
 3. **Quiz de 5 preguntas** con 4 opciones, temporizador de 20s y retroalimentación inmediata
 
+### Diferenciación pedagógica por grado
+
+- **Grado 8**: explicación introductoria, visual y cotidiana. Prioriza observación, identificación de conceptos básicos y ejercicios de comprensión.
+- **Grado 10**: explicación científica y analítica. Prioriza clasificación, modelos, cálculos, interpretación de datos y resolución de problemas.
+
 | Día | Tema | Grado 8 | Grado 10 |
 |---|---|---|---|
-| 1 | Estructura Atómica | Modelos atómicos, partículas, Z y A | Orbitales s/p/d/f, configuración electrónica, anomalías |
-| 2 | Tabla Periódica | Grupos, períodos, metales/no-metales | Bloques, tendencias periódicas, electronegatividad |
-| 3 | Tipos de Reacciones | Síntesis, descomposición, combustión | Redox, número de oxidación, velocidad de reacción |
-| 4 | Balanceo de Ecuaciones | Método de tanteo | Método redox, semirreacciones, medio ácido/básico |
-| 5 | Estequiometría | Mol, Avogadro, n=m/M | Reactivo limitante, rendimiento%, molaridad |
-| 6 | Termodinámica | Exo/endotérmica, ΔH, 1ª Ley | ΔG=ΔH−TΔS, Ley de Hess, q=mcΔT |
+| 1 | La Materia | Qué es la materia, estados, cambios físicos y propiedades simples | Clasificación de la materia, propiedades físicas y químicas, densidad, solubilidad y separación de mezclas |
+| 2 | El Átomo | Partículas subatómicas, cargas, ubicación y número atómico básico | Modelos atómicos, línea de tiempo histórica, número másico, isótopos, configuración electrónica y valencia |
+| 3 | Enlaces Químicos | Enlace iónico, enlace covalente y regla del octeto | Enlace iónico, covalente y metálico, electronegatividad, polaridad y análisis del enlace |
+| 4 | Ácidos y Bases | Reconocimiento de ácidos y bases, escala de pH y neutralización cotidiana | Teorías de Arrhenius, Bronsted-Lowry y Lewis, pH/pOH, soluciones tampón e interpretación de escala química |
+| 5 | Reacciones Químicas | Reactivos y productos, señales de reacción y tipos básicos | Reacciones redox, balanceo, velocidad de reacción, energía de activación, catalizadores y termoquímica |
+| 6 | Compuestos Inorgánicos | Óxidos, hidróxidos, ácidos y sales con ejemplos sencillos | Clasificación avanzada, nomenclatura Stock/IUPAC, formulación y formación de sales |
 
 ---
 
@@ -99,6 +104,18 @@ Aparece entre los slides y el quiz en las lecciones de grado 10. Consiste en **5
 - **Desbloqueo de temas sin prerequisitos (mayo 2026)**: en `renderHome()` de `index.html` se eliminó la condición que exigía completar el tema anterior con 3★ para avanzar.
 - Resultado: todos los nodos se pueden abrir directamente, sin candado ni bloqueo por desempeño previo.
 - Se conserva sin cambios la lógica de EXP, puntos, estrellas, penalización por <3★ y recuperación por mejora.
+
+### Diferenciación de Grados (Opción 3 — Estructura Completamente Separada)
+- **Grado 8** (6 lecciones básicas): La Materia, El Átomo, Enlaces Químicos, Ácidos y Bases, Reacciones Químicas, Compuestos Inorgánicos.
+- **Grado 10** (6 lecciones avanzadas, independientes): La Materia, El Átomo, Enlaces Químicos, Ácidos y Bases, Reacciones Químicas, Compuestos Inorgánicos (con profundidad superior).
+- Cada grado tiene **slides y preguntas completamente diferentes**, no comparte contenido.
+- Grado 10 incluye: clasificación formal, modelos y configuración electrónica, teorías ácido-base, electronegatividad/polaridad, cinética/termoquímica y nomenclatura avanzada.
+
+### Actualización de contenido (mayo 2026)
+- Se aplicó la guía de teoría y ejercicios para actualizar el contenido pedagógico de lecciones.
+- Se diferenciaron de forma explícita los contenidos de **Grado 8** y **Grado 10** en `DAYS[8]` y `DAYS[10]` dentro de `index.html`.
+- Resultado: los dos grados comparten solo los ejes generales de química inorgánica, pero cada uno tiene teoría, ejercicios y preguntas adaptadas a su nivel.
+- Corrección adicional: se eliminó un bloque legado que sobrescribía `DAYS[10]` copiando `DAYS[8]`; ahora sí se visualizan contenidos y preguntas distintos por grado.
 
 ---
 
