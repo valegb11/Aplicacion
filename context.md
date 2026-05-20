@@ -28,7 +28,7 @@ Una **aplicación web educativa gamificada** (HTML + CSS + JavaScript puro, un s
 | Logros | 7 logros desbloqueables |
 | Penalización | <3★ → XP reducido, nodo marcado en naranja con el XP perdido |
 | Recuperación | Repetir con mejores estrellas → recupera XP diferencial + 25 XP bonus |
-| Desbloqueo | Siguiente lección se desbloquea **solo si consigues 3★**; si no, hay que repetir |
+| Desbloqueo | **Todas las lecciones están desbloqueadas** desde el inicio; se mantiene el sistema de EXP, estrellas, penalización y recuperación |
 
 ---
 
@@ -94,6 +94,11 @@ Aparece entre los slides y el quiz en las lecciones de grado 10. Consiste en **5
 - Toda modificación funcional, de UX, arquitectura, datos, reglas de gamificación o persistencia debe reflejarse en este archivo cuando sea relevante.
 - Si un cambio no impacta comportamiento/documentación del proyecto (por ejemplo ajustes menores visuales sin efecto funcional), no requiere actualización obligatoria.
 - Cada actualización debe ser puntual: qué cambió, dónde cambió y por qué.
+
+### Cambios recientes
+- **Desbloqueo de temas sin prerequisitos (mayo 2026)**: en `renderHome()` de `index.html` se eliminó la condición que exigía completar el tema anterior con 3★ para avanzar.
+- Resultado: todos los nodos se pueden abrir directamente, sin candado ni bloqueo por desempeño previo.
+- Se conserva sin cambios la lógica de EXP, puntos, estrellas, penalización por <3★ y recuperación por mejora.
 
 ---
 

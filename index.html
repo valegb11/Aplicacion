@@ -1778,13 +1778,8 @@ function renderHome(){
   map.innerHTML = days.map((d,i)=>{
     const done  = state.completedDays.includes(d.id);
     const res   = state.dayResults[d.id];
-    // A day is unlocked if:
-    //   • it's the first day (i===0), OR
-    //   • the PREVIOUS day was completed with 3 stars
-    const prevRes   = i > 0 ? state.dayResults[days[i-1].id] : null;
-    const prevDone  = i > 0 ? state.completedDays.includes(days[i-1].id) : true;
-    const prevPerfect = prevRes && prevRes.stars === 3;
-    const locked = i > 0 && !(prevDone && prevPerfect);
+    // All days are always available; progression is tracked by XP/stars only.
+    const locked = false;
 
     const isToday  = !done && !locked;
     const incomplete = done && res && res.stars < 3;
@@ -1793,16 +1788,9 @@ function renderHome(){
     const stars      = res ? '★'.repeat(res.stars)+'☆'.repeat(3-res.stars) : '☆☆☆';
     const starsColor = perfect ? d.color : incomplete ? 'var(--orange)' : 'var(--muted)';
 
-    // Lock message: distinguish "prev not done" vs "prev done but < 3 stars"
-    let lockMsg = '';
-    if(locked){
-      if(!prevDone) lockMsg = 'toast(\'Completa la lección anterior primero 🔒\',\'🔒\')';
-      else lockMsg = 'toast(\'Necesitas ⭐⭐⭐ en la lección anterior para continuar\',\'🌟\')';
-    }
-
     return `<div class="day-node ${done?'completed':''} ${locked?'locked':''} ${isToday?'today':''} ${incomplete?'incomplete':''}"
       style="--node-color:${incomplete?'var(--orange)':d.color}"
-      onclick="${locked ? lockMsg : 'startDay(\''+d.id+'\')'}">
+      onclick="startDay('${d.id}')">
       ${perfect?'<div class="node-badge">✓</div>':''}
       ${incomplete?`<div class="node-badge incomplete-badge">-${lostXP}XP</div>`:''}
       <div class="node-day">DÍA ${d.day}</div>
@@ -1810,7 +1798,6 @@ function renderHome(){
       <div class="node-title">${d.title}</div>
       <div class="node-stars" style="color:${starsColor}">${stars}</div>
       ${incomplete?'<div style="font-size:.6rem;color:var(--orange);margin-top:.3rem;font-family:var(--font-game)">REPETIR</div>':''}
-      ${locked&&prevDone&&!prevPerfect?'<div style="font-size:.55rem;color:var(--muted);margin-top:.3rem;font-family:var(--font-game);line-height:1.4">NECESITAS<br>⭐⭐⭐</div>':''}
     </div>`;
   }).join('');
   // Achievements
