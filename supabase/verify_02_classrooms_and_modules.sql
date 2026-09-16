@@ -13,6 +13,13 @@ where table_schema = 'public'
   )
 order by table_name;
 
+-- 1.1 Confirma que el perfil puede guardar el grado asignado al docente.
+select column_name, data_type, is_nullable
+from information_schema.columns
+where table_schema = 'public'
+  and table_name = 'profiles'
+  and column_name = 'assigned_grade';
+
 -- 2. Muestra si la seguridad RLS está activada en cada tabla.
 select relname as table_name, relrowsecurity as rls_enabled
 from pg_class

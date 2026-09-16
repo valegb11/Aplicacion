@@ -2,14 +2,21 @@
 -- IMPORTANTE: este archivo está preparado para una etapa posterior.
 -- No lo ejecutes en Supabase hasta revisarlo junto con el equipo.
 
+-- Cada docente tiene un único grado asignado. Los estudiantes no necesitan
+-- guardar el grado: este se obtiene del salón al que pertenecen.
+alter table public.profiles
+  add column if not exists assigned_grade smallint
+  check (assigned_grade in (8, 10));
+
 -- Un salón pertenece a un docente y tiene un código corto para identificarlo.
 create table if not exists public.classrooms (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(trim(name)) between 2 and 80),
-  grade smallint not null check (grade between 1 and 11),
+  grade smallint not null check (grade in (8, 10)),
   teacher_id uuid not null references public.profiles(id) on delete restrict,
   join_code text not null unique
-    default upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8)),
+    default lpad((floor(random() * 1000000))::integer::text, 6, '0')
+    check (join_code ~ '^[0-9]{6}$'),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -19,7 +26,7 @@ create table if not exists public.study_modules (
   id uuid primary key default gen_random_uuid(),
   title text not null check (char_length(trim(title)) between 2 and 120),
   description text not null default '',
-  grade smallint not null check (grade between 1 and 11),
+  grade smallint not null check (grade in (8, 10)),
   created_by uuid not null references public.profiles(id) on delete restrict,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -134,9 +141,9 @@ revoke all on public.classroom_members from anon, authenticated;
 revoke all on public.classroom_modules from anon, authenticated;
 
 grant select, insert, delete on public.classrooms to authenticated;
-grant update (name, grade) on public.classrooms to authenticated;
+grant update (name) on public.classrooms to authenticated;
 grant select, insert, delete on public.study_modules to authenticated;
-grant update (title, description, grade) on public.study_modules to authenticated;
+grant update (title, description) on public.study_modules to authenticated;
 grant select, insert, delete on public.classroom_members to authenticated;
 grant select, insert, delete on public.classroom_modules to authenticated;
 
@@ -166,7 +173,15 @@ drop policy if exists "Teachers create classrooms" on public.classrooms;
 create policy "Teachers create classrooms"
   on public.classrooms for insert to authenticated
   with check (
-    (teacher_id = (select auth.uid()) and private.current_user_role() = 'teacher')
+    (
+      teacher_id = (select auth.uid())
+      and private.current_user_role() = 'teacher'
+      and grade = (
+        select assigned_grade
+        from public.profiles
+        where id = (select auth.uid())
+      )
+    )
     or private.current_user_role() = 'admin'
   );
 
@@ -265,7 +280,15 @@ drop policy if exists "Teachers create modules" on public.study_modules;
 create policy "Teachers create modules"
   on public.study_modules for insert to authenticated
   with check (
-    (created_by = (select auth.uid()) and private.current_user_role() = 'teacher')
+    (
+      created_by = (select auth.uid())
+      and private.current_user_role() = 'teacher'
+      and grade = (
+        select assigned_grade
+        from public.profiles
+        where id = (select auth.uid())
+      )
+    )
     or private.current_user_role() = 'admin'
   );
 

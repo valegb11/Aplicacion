@@ -25,6 +25,99 @@
   </section>
 </main>
 
+<!-- ════ PANEL DEL DOCENTE ════ -->
+<main class="teacher-shell" id="teacher-shell" hidden>
+  <header class="teacher-header">
+    <div>
+      <div class="logo">⚗ ChemQuest</div>
+      <div class="logo-sub">Panel del docente · Química Inorgánica</div>
+    </div>
+    <div class="teacher-account">
+      <span class="account-chip" id="teacher-account-chip"></span>
+      <button class="logout-btn" id="teacher-logout-btn" type="button">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="teacher-main">
+    <section class="teacher-hero" aria-labelledby="teacher-title">
+      <div>
+        <p class="teacher-eyebrow">ESPACIO DE TRABAJO</p>
+        <h1 id="teacher-title">Hola, <span id="teacher-name">docente</span></h1>
+        <p>Administra tus salones y consulta los estudiantes vinculados a tu grado.</p>
+      </div>
+      <div class="teacher-grade-card">
+        <span>GRADO ASIGNADO</span>
+        <strong id="teacher-grade">—</strong>
+        <small>El grado solo puede ser asignado por un administrador.</small>
+      </div>
+    </section>
+
+    <p class="teacher-status" id="teacher-status" role="status" aria-live="polite"></p>
+
+    <section class="teacher-stats" aria-label="Resumen de salones">
+      <article class="teacher-stat-card">
+        <span>🏫</span><strong id="teacher-classroom-count">0</strong><small>Salones</small>
+      </article>
+      <article class="teacher-stat-card">
+        <span>🎓</span><strong id="teacher-student-count">0</strong><small>Estudiantes vinculados</small>
+      </article>
+      <article class="teacher-stat-card">
+        <span>🧪</span><strong id="teacher-module-count">0</strong><small>Quizzes publicados</small>
+      </article>
+    </section>
+
+    <div class="teacher-grid">
+      <section class="teacher-panel" aria-labelledby="create-classroom-title">
+        <p class="teacher-panel-kicker">NUEVO SALÓN</p>
+        <h2 id="create-classroom-title">Crear un salón</h2>
+        <p>El código único de 6 dígitos se generará automáticamente.</p>
+        <form id="create-classroom-form">
+          <label for="classroom-name">Nombre del salón</label>
+          <input id="classroom-name" name="classroom-name" type="text" minlength="2" maxlength="80"
+            placeholder="Ejemplo: 10.º 03" autocomplete="off" required>
+          <button class="teacher-primary-btn" id="create-classroom-btn" type="submit">Crear salón</button>
+        </form>
+      </section>
+
+      <section class="teacher-panel teacher-classrooms-panel" aria-labelledby="classrooms-title">
+        <div class="teacher-panel-heading">
+          <div>
+            <p class="teacher-panel-kicker">MIS SALONES</p>
+            <h2 id="classrooms-title">Salones del grado</h2>
+          </div>
+          <button class="teacher-secondary-btn" id="refresh-classrooms-btn" type="button">Actualizar</button>
+        </div>
+        <div class="teacher-empty" id="teacher-classrooms-empty">
+          Aún no has creado salones para este grado.
+        </div>
+        <div class="teacher-classroom-list" id="teacher-classroom-list"></div>
+      </section>
+    </div>
+
+    <section class="teacher-panel teacher-roster-panel" id="teacher-roster-panel" aria-labelledby="roster-title" hidden>
+      <div class="teacher-panel-heading">
+        <div>
+          <p class="teacher-panel-kicker">ESTUDIANTES</p>
+          <h2 id="roster-title">Integrantes del salón</h2>
+          <p id="roster-classroom-name"></p>
+        </div>
+        <button class="teacher-secondary-btn" id="copy-classroom-code-btn" type="button">Copiar código</button>
+      </div>
+      <div class="teacher-empty" id="teacher-roster-empty">Ningún estudiante ha ingresado este código todavía.</div>
+      <div class="teacher-roster-list" id="teacher-roster-list"></div>
+    </section>
+
+    <section class="teacher-panel teacher-coming-next" aria-labelledby="summative-title">
+      <div>
+        <p class="teacher-panel-kicker">PANEL SUMATIVO</p>
+        <h2 id="summative-title">Quizzes del docente</h2>
+        <p>La creación, publicación y consulta de resultados de quizzes se añadirá sobre los salones ya configurados.</p>
+      </div>
+      <span class="teacher-phase-badge">SIGUIENTE FASE</span>
+    </section>
+  </div>
+</main>
+
 <div id="app-shell">
 <canvas id="stars"></canvas>
 <div id="particles"></div>
@@ -156,6 +249,7 @@
 <!-- Librería que permite que ChemQuest se comunique con Supabase. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="assets/js/supabase-client.js"></script>
+<script src="assets/js/teacher.js"></script>
 <script src="assets/js/auth.js?v=2"></script>
 <script src="assets/js/app.js"></script>
 </body>

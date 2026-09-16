@@ -15,10 +15,11 @@ Así podemos saber exactamente qué se creó y repetirlo si fuera necesario.
 
 `02_classrooms_and_modules.sql` está preparado para el siguiente paso y crea:
 
+- el grado asignado del docente, limitado a 8.º o 10.º;
 - salones pertenecientes a docentes;
 - módulos o clases reutilizables;
 - inscripciones de estudiantes en salones;
-- ingreso seguro de estudiantes mediante el código del salón;
+- ingreso seguro de estudiantes mediante un código numérico de 6 dígitos;
 - asignaciones de módulos a salones;
 - reglas para que cada persona vea o modifique únicamente lo permitido;
 - acceso del docente a los perfiles de los estudiantes de sus propios salones.

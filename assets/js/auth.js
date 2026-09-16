@@ -1,37 +1,60 @@
 const authScreen = document.getElementById('auth-screen');
 const appShell = document.getElementById('app-shell');
+const teacherShell = document.getElementById('teacher-shell');
 const googleLoginButton = document.getElementById('google-login-btn');
-const logoutButton = document.getElementById('logout-btn');
+const logoutButtons = document.querySelectorAll('#logout-btn, #teacher-logout-btn');
 const authStatus = document.getElementById('auth-status');
 const accountChip = document.getElementById('account-chip');
 
-async function showAccount(session) {
-  accountChip.hidden = !session;
-  accountChip.textContent = '';
+function setLogoutState(isAuthenticated) {
+  logoutButtons.forEach(button => {
+    button.hidden = !isAuthenticated;
+    button.disabled = false;
+  });
+}
 
-  if (!session) return;
+function showStudentAccount(profile, session) {
+  accountChip.hidden = false;
+  accountChip.textContent = profile.full_name || profile.email || session.user.email || 'Cuenta de Google';
+  accountChip.title = profile.email || session.user.email || '';
+}
 
+function showSignedOut() {
+  authScreen.hidden = false;
+  appShell.hidden = true;
+  teacherShell.hidden = true;
+  accountChip.hidden = true;
+  setLogoutState(false);
+  window.chemquestTeacher?.reset();
+}
+
+async function showAuthenticatedExperience(session) {
   const { data: profile, error } = await window.chemquestSupabase
     .from('profiles')
-    .select('full_name, email')
+    .select('id, full_name, email, role, assigned_grade')
     .eq('id', session.user.id)
     .single();
 
   if (error) {
     console.error('No se pudo cargar el perfil:', error.message);
-    accountChip.textContent = session.user.email || 'Cuenta de Google';
+    showSignedOut();
+    authStatus.textContent = 'Tu cuenta inició sesión, pero no pudimos cargar su perfil. Verifica la configuración de Supabase.';
     return;
   }
 
-  accountChip.textContent = profile.full_name || profile.email;
-  accountChip.title = profile.email;
-}
+  authScreen.hidden = true;
+  setLogoutState(true);
 
-function showAuthenticatedApp(isAuthenticated, session = null) {
-  authScreen.hidden = isAuthenticated;
-  appShell.hidden = !isAuthenticated;
-  logoutButton.hidden = !isAuthenticated;
-  showAccount(session);
+  if (profile.role === 'teacher') {
+    appShell.hidden = true;
+    teacherShell.hidden = false;
+    await window.chemquestTeacher.initialize(profile, session);
+    return;
+  }
+
+  teacherShell.hidden = true;
+  appShell.hidden = false;
+  showStudentAccount(profile, session);
 }
 
 async function signInWithGoogle() {
@@ -51,25 +74,42 @@ async function signInWithGoogle() {
 }
 
 async function signOut() {
-  logoutButton.disabled = true;
+  logoutButtons.forEach(button => { button.disabled = true; });
   const { error } = await window.chemquestSupabase.auth.signOut();
-  logoutButton.disabled = false;
 
   if (error) {
     console.error('No se pudo cerrar la sesión:', error.message);
+    logoutButtons.forEach(button => { button.disabled = false; });
   }
+}
+
+async function handleSession(session) {
+  authStatus.textContent = '';
+  googleLoginButton.disabled = false;
+
+  if (!session) {
+    showSignedOut();
+    return;
+  }
+
+  authScreen.hidden = false;
+  appShell.hidden = true;
+  teacherShell.hidden = true;
+  authStatus.textContent = 'Preparando tu espacio…';
+  await showAuthenticatedExperience(session);
 }
 
 async function initializeAuthentication() {
   // Durante desarrollo, ChemQuest sigue disponible en modo local si la
   // librería externa no pudo cargarse.
   if (!window.chemquestSupabase) {
-    showAuthenticatedApp(true);
+    authScreen.hidden = true;
+    appShell.hidden = false;
+    teacherShell.hidden = true;
     return;
   }
 
-  appShell.hidden = true;
-  authScreen.hidden = false;
+  showSignedOut();
   authStatus.textContent = 'Comprobando tu sesión…';
 
   const { data, error } = await window.chemquestSupabase.auth.getSession();
@@ -78,16 +118,13 @@ async function initializeAuthentication() {
     return;
   }
 
-  authStatus.textContent = '';
-  showAuthenticatedApp(Boolean(data.session), data.session);
+  await handleSession(data.session);
 
   window.chemquestSupabase.auth.onAuthStateChange((_event, session) => {
-    authStatus.textContent = '';
-    googleLoginButton.disabled = false;
-    showAuthenticatedApp(Boolean(session), session);
+    setTimeout(() => handleSession(session), 0);
   });
 }
 
 googleLoginButton.addEventListener('click', signInWithGoogle);
-logoutButton.addEventListener('click', signOut);
+logoutButtons.forEach(button => button.addEventListener('click', signOut));
 initializeAuthentication();
