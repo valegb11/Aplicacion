@@ -3,7 +3,7 @@
 ## ChemQuest — Contexto del Proyecto
 
 ### ¿Qué es?
-Una **aplicación web educativa gamificada** (HTML + CSS + JavaScript puro, un solo archivo) para enseñar química inorgánica a estudiantes de 8° y 10° grado. Inspirada en Duolingo pero con estética de videojuego RPG espacial (fondo oscuro, estrellas, partículas).
+Una **página web educativa gamificada** (HTML + CSS + JavaScript) para enseñar química inorgánica a estudiantes de 8° y 10° grado. Inspirada en Duolingo pero con estética de videojuego RPG espacial (fondo oscuro, estrellas, partículas).
 
 ---
 
