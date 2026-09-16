@@ -11,6 +11,7 @@
   const classroomEmpty = document.getElementById('teacher-classrooms-empty');
   const createForm = document.getElementById('create-classroom-form');
   const classroomName = document.getElementById('classroom-name');
+  const classroomGrade = document.getElementById('classroom-grade');
   const createButton = document.getElementById('create-classroom-btn');
   const refreshButton = document.getElementById('refresh-classrooms-btn');
   const rosterPanel = document.getElementById('teacher-roster-panel');
@@ -23,6 +24,7 @@
   let currentSession = null;
   let classrooms = [];
   let selectedClassroom = null;
+  let assignedGrades = [];
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -112,8 +114,10 @@
     event.preventDefault();
     const cleanName = classroomName.value.trim();
 
-    if (!currentProfile?.assigned_grade) {
-      setStatus('Tu cuenta de docente todavía no tiene un grado asignado.', 'error');
+    const selectedGrade = Number(classroomGrade.value);
+
+    if (!assignedGrades.includes(selectedGrade)) {
+      setStatus('Selecciona uno de los grados asignados a tu cuenta.', 'error');
       return;
     }
 
@@ -130,7 +134,7 @@
       .from('classrooms')
       .insert({
         name: cleanName,
-        grade: currentProfile.assigned_grade,
+        grade: selectedGrade,
         teacher_id: currentSession.user.id
       })
       .select('id, name, grade, join_code, created_at')
@@ -228,14 +232,36 @@
     name.textContent = displayName.split(' ')[0];
     account.textContent = displayName;
     account.title = profile.email;
-    grade.textContent = profile.assigned_grade ? `${profile.assigned_grade}.º` : 'Sin asignar';
-    createButton.disabled = !profile.assigned_grade;
     moduleCount.textContent = '0';
+
+    const { data: gradeRows, error: gradeError } = await window.chemquestSupabase
+      .from('teacher_grades')
+      .select('grade')
+      .eq('teacher_id', session.user.id)
+      .order('grade', { ascending: true });
+
+    if (gradeError) {
+      assignedGrades = [];
+      grade.textContent = 'No disponible';
+      classroomGrade.innerHTML = '<option value="">Sin grados asignados</option>';
+      createButton.disabled = true;
+      setStatus(`No se pudieron cargar tus grados: ${gradeError.message}`, 'error');
+      return;
+    }
+
+    assignedGrades = gradeRows.map(row => row.grade);
+    grade.textContent = assignedGrades.length
+      ? assignedGrades.map(value => `${value}.º`).join(' y ')
+      : 'Sin asignar';
+    classroomGrade.innerHTML = assignedGrades
+      .map(value => `<option value="${value}">${value}.º</option>`)
+      .join('') || '<option value="">Sin grados asignados</option>';
+    createButton.disabled = assignedGrades.length === 0;
 
     await loadClassrooms();
 
-    if (!profile.assigned_grade) {
-      setStatus('Un administrador debe asignarte el grado 8.º o 10.º antes de crear salones.', 'error');
+    if (!assignedGrades.length) {
+      setStatus('Un administrador debe asignarte al menos un grado antes de crear salones.', 'error');
     }
   }
 
@@ -244,6 +270,7 @@
     currentSession = null;
     classrooms = [];
     selectedClassroom = null;
+    assignedGrades = [];
     classroomList.innerHTML = '';
     rosterList.innerHTML = '';
     rosterPanel.hidden = true;

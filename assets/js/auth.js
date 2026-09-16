@@ -31,7 +31,7 @@ function showSignedOut() {
 async function showAuthenticatedExperience(session) {
   const { data: profile, error } = await window.chemquestSupabase
     .from('profiles')
-    .select('id, full_name, email, role, assigned_grade')
+    .select('id, full_name, email, role')
     .eq('id', session.user.id)
     .single();
 

@@ -2,11 +2,29 @@
 -- IMPORTANTE: este archivo está preparado para una etapa posterior.
 -- No lo ejecutes en Supabase hasta revisarlo junto con el equipo.
 
--- Cada docente tiene un único grado asignado. Los estudiantes no necesitan
--- guardar el grado: este se obtiene del salón al que pertenecen.
-alter table public.profiles
-  add column if not exists assigned_grade smallint
-  check (assigned_grade in (8, 10));
+-- Un docente puede tener uno o varios grados autorizados. Los estudiantes no
+-- guardan un grado: este se obtiene del salón al que pertenecen.
+create table if not exists public.teacher_grades (
+  teacher_id uuid not null references public.profiles(id) on delete cascade,
+  grade smallint not null check (grade in (8, 10)),
+  assigned_at timestamptz not null default now(),
+  primary key (teacher_id, grade)
+);
+
+-- Correos docentes autorizados por los administradores del proyecto. Esta
+-- tabla vive en private y no es consultable desde la página web.
+create table if not exists private.teacher_defaults (
+  email text not null,
+  grade smallint not null check (grade in (8, 10)),
+  primary key (email, grade),
+  check (email = lower(trim(email)))
+);
+
+insert into private.teacher_defaults (email, grade)
+values
+  ('valentina.gonzalez@gimsaber.edu.co', 8),
+  ('valentina.gonzalez@gimsaber.edu.co', 10)
+on conflict (email, grade) do nothing;
 
 -- Un salón pertenece a un docente y tiene un código corto para identificarlo.
 create table if not exists public.classrooms (
@@ -55,6 +73,55 @@ create index if not exists classroom_members_student_idx
   on public.classroom_members(student_id);
 create index if not exists study_modules_creator_idx
   on public.study_modules(created_by);
+
+-- Amplía el alta automática de perfiles: los correos autorizados nacen como
+-- docentes y reciben todos sus grados; las demás cuentas nacen como estudiantes.
+create or replace function private.create_profile_for_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.profiles (id, email, full_name, avatar_url, role)
+  values (
+    new.id,
+    coalesce(new.email, ''),
+    coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name', ''),
+    new.raw_user_meta_data ->> 'avatar_url',
+    case
+      when exists (
+        select 1 from private.teacher_defaults
+        where email = lower(coalesce(new.email, ''))
+      ) then 'teacher'::public.user_role
+      else 'student'::public.user_role
+    end
+  )
+  on conflict (id) do nothing;
+
+  insert into public.teacher_grades (teacher_id, grade)
+  select new.id, defaults.grade
+  from private.teacher_defaults defaults
+  where defaults.email = lower(coalesce(new.email, ''))
+  on conflict (teacher_id, grade) do nothing;
+
+  return new;
+end;
+$$;
+
+revoke all on function private.create_profile_for_new_user() from public, anon, authenticated;
+
+-- Aplica la configuración también si el correo ya había iniciado sesión antes
+-- de ejecutar este archivo.
+update public.profiles
+set role = 'teacher'
+where lower(email) = 'valentina.gonzalez@gimsaber.edu.co';
+
+insert into public.teacher_grades (teacher_id, grade)
+select profile.id, defaults.grade
+from public.profiles profile
+join private.teacher_defaults defaults on defaults.email = lower(profile.email)
+on conflict (teacher_id, grade) do nothing;
 
 -- Funciones internas usadas por las reglas de seguridad.
 create or replace function private.current_user_role()
@@ -134,11 +201,13 @@ alter table public.classrooms enable row level security;
 alter table public.study_modules enable row level security;
 alter table public.classroom_members enable row level security;
 alter table public.classroom_modules enable row level security;
+alter table public.teacher_grades enable row level security;
 
 revoke all on public.classrooms from anon, authenticated;
 revoke all on public.study_modules from anon, authenticated;
 revoke all on public.classroom_members from anon, authenticated;
 revoke all on public.classroom_modules from anon, authenticated;
+revoke all on public.teacher_grades from anon, authenticated;
 
 grant select, insert, delete on public.classrooms to authenticated;
 grant update (name) on public.classrooms to authenticated;
@@ -146,6 +215,15 @@ grant select, insert, delete on public.study_modules to authenticated;
 grant update (title, description) on public.study_modules to authenticated;
 grant select, insert, delete on public.classroom_members to authenticated;
 grant select, insert, delete on public.classroom_modules to authenticated;
+grant select on public.teacher_grades to authenticated;
+
+drop policy if exists "Teachers read their assigned grades" on public.teacher_grades;
+create policy "Teachers read their assigned grades"
+  on public.teacher_grades for select to authenticated
+  using (
+    teacher_id = (select auth.uid())
+    or private.current_user_role() = 'admin'
+  );
 
 -- Amplía la lectura de perfiles sin exponer el directorio completo: un
 -- docente solo puede ver estudiantes inscritos en sus propios salones.
@@ -176,10 +254,11 @@ create policy "Teachers create classrooms"
     (
       teacher_id = (select auth.uid())
       and private.current_user_role() = 'teacher'
-      and grade = (
-        select assigned_grade
-        from public.profiles
-        where id = (select auth.uid())
+      and exists (
+        select 1
+        from public.teacher_grades assignment
+        where assignment.teacher_id = (select auth.uid())
+          and assignment.grade = classrooms.grade
       )
     )
     or private.current_user_role() = 'admin'
@@ -283,10 +362,11 @@ create policy "Teachers create modules"
     (
       created_by = (select auth.uid())
       and private.current_user_role() = 'teacher'
-      and grade = (
-        select assigned_grade
-        from public.profiles
-        where id = (select auth.uid())
+      and exists (
+        select 1
+        from public.teacher_grades assignment
+        where assignment.teacher_id = (select auth.uid())
+          and assignment.grade = study_modules.grade
       )
     )
     or private.current_user_role() = 'admin'

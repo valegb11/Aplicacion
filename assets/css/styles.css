@@ -868,11 +868,11 @@ body{
 .teacher-panel p:not(.teacher-panel-kicker){margin:.55rem 0 1rem;color:var(--muted);line-height:1.55;font-size:.85rem}
 .teacher-panel form{display:grid;gap:.65rem;margin-top:1.25rem}
 .teacher-panel label{font-size:.78rem;font-weight:800;color:var(--dim)}
-.teacher-panel input{
+.teacher-panel input,.teacher-panel select{
   width:100%;padding:.8rem .9rem;border:1px solid var(--border2);border-radius:12px;background:var(--bg2);
   color:var(--text);font:inherit;outline:none;
 }
-.teacher-panel input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+.teacher-panel input:focus,.teacher-panel select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
 .teacher-primary-btn,.teacher-secondary-btn{
   border-radius:11px;padding:.7rem .9rem;font-family:var(--font-body);font-weight:800;cursor:pointer;
 }

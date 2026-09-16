@@ -48,7 +48,7 @@
       <div class="teacher-grade-card">
         <span>GRADO ASIGNADO</span>
         <strong id="teacher-grade">—</strong>
-        <small>El grado solo puede ser asignado por un administrador.</small>
+        <small>Los grados solo pueden ser asignados por un administrador.</small>
       </div>
     </section>
 
@@ -75,6 +75,8 @@
           <label for="classroom-name">Nombre del salón</label>
           <input id="classroom-name" name="classroom-name" type="text" minlength="2" maxlength="80"
             placeholder="Ejemplo: 10.º 03" autocomplete="off" required>
+          <label for="classroom-grade">Grado del salón</label>
+          <select id="classroom-grade" name="classroom-grade" required></select>
           <button class="teacher-primary-btn" id="create-classroom-btn" type="submit">Crear salón</button>
         </form>
       </section>

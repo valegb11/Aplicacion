@@ -1,7 +1,7 @@
 -- ChemQuest: comprobación segura del paso 2.
 -- Este archivo SOLO LEE información; no crea, modifica ni elimina datos.
 
--- 1. Confirma que existen las cuatro tablas académicas.
+-- 1. Confirma que existen las cinco tablas académicas.
 select table_name
 from information_schema.tables
 where table_schema = 'public'
@@ -9,16 +9,19 @@ where table_schema = 'public'
     'classrooms',
     'study_modules',
     'classroom_members',
-    'classroom_modules'
+    'classroom_modules',
+    'teacher_grades'
   )
 order by table_name;
 
--- 1.1 Confirma que el perfil puede guardar el grado asignado al docente.
-select column_name, data_type, is_nullable
-from information_schema.columns
-where table_schema = 'public'
-  and table_name = 'profiles'
-  and column_name = 'assigned_grade';
+-- 1.1 Confirma que el correo docente predeterminado tiene ambos grados.
+select profile.email, profile.role, assignment.grade
+from public.profiles profile
+join public.teacher_grades assignment on assignment.teacher_id = profile.id
+where lower(profile.email) = 'valentina.gonzalez@gimsaber.edu.co'
+order by assignment.grade;
+
+-- Resultado esperado: dos filas, una con grado 8 y otra con grado 10.
 
 -- 2. Muestra si la seguridad RLS está activada en cada tabla.
 select relname as table_name, relrowsecurity as rls_enabled
@@ -29,7 +32,8 @@ where pg_namespace.nspname = 'public'
     'classrooms',
     'study_modules',
     'classroom_members',
-    'classroom_modules'
+    'classroom_modules',
+    'teacher_grades'
   )
 order by relname;
 
@@ -42,7 +46,8 @@ where schemaname = 'public'
     'classrooms',
     'study_modules',
     'classroom_members',
-    'classroom_modules'
+    'classroom_modules',
+    'teacher_grades'
   )
 order by tablename, policyname;
 

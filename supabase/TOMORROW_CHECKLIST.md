@@ -4,12 +4,12 @@ Esta lista evita saltarnos pasos y protege lo que ya funciona.
 
 1. Abrir ChemQuest publicado y confirmar que Google todavía permite entrar.
 2. Revisar en Supabase el perfil que se usará como docente.
-3. Cambiar únicamente ese perfil de `student` a `teacher` y asignarle el grado
-   `8` o `10` en `assigned_grade`.
+3. Confirmar que el correo docente predeterminado quedó con rol `teacher` y
+   tiene los grados `8` y `10` en `teacher_grades`.
 4. Leer juntos `02_classrooms_and_modules.sql` antes de ejecutarlo.
 5. Ejecutar el archivo una sola vez desde el SQL Editor de Supabase.
 6. Ejecutar `verify_02_classrooms_and_modules.sql`, que solo lee datos.
-7. Confirmar que aparecen cuatro tablas y que todas tienen RLS activado.
+7. Confirmar que aparecen cinco tablas y que todas tienen RLS activado.
 8. Crear un salón de prueba y comprobar sus permisos.
    Confirmar que su código contiene exactamente 6 dígitos y que el docente no
    puede crear salones para un grado distinto del asignado.
