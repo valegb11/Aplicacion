@@ -1,7 +1,7 @@
 -- ChemQuest: comprobación segura del paso 2.
 -- Este archivo SOLO LEE información; no crea, modifica ni elimina datos.
 
--- 1. Confirma que existen las cinco tablas académicas.
+-- 1. Confirma que existen las ocho tablas académicas.
 select table_name
 from information_schema.tables
 where table_schema = 'public'
@@ -10,7 +10,10 @@ where table_schema = 'public'
     'study_modules',
     'classroom_members',
     'classroom_modules',
-    'teacher_grades'
+    'teacher_grades',
+    'student_progress',
+    'teacher_quizzes',
+    'quiz_questions'
   )
 order by table_name;
 
@@ -33,7 +36,10 @@ where pg_namespace.nspname = 'public'
     'study_modules',
     'classroom_members',
     'classroom_modules',
-    'teacher_grades'
+    'teacher_grades',
+    'student_progress',
+    'teacher_quizzes',
+    'quiz_questions'
   )
 order by relname;
 
@@ -47,7 +53,10 @@ where schemaname = 'public'
     'study_modules',
     'classroom_members',
     'classroom_modules',
-    'teacher_grades'
+    'teacher_grades',
+    'student_progress',
+    'teacher_quizzes',
+    'quiz_questions'
   )
 order by tablename, policyname;
 

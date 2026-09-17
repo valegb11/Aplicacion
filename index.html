@@ -27,34 +27,48 @@
 
 <!-- ════ PANEL DEL DOCENTE ════ -->
 <main class="teacher-shell" id="teacher-shell" hidden>
-  <header class="teacher-header">
-    <div>
+  <aside class="teacher-sidebar" aria-label="Navegación del panel docente">
+    <div class="teacher-brand">
       <div class="logo">⚗ ChemQuest</div>
-      <div class="logo-sub">Panel del docente · Química Inorgánica</div>
+      <div class="logo-sub">Panel del docente</div>
     </div>
-    <div class="teacher-account">
-      <span class="account-chip" id="teacher-account-chip"></span>
-      <button class="logout-btn" id="teacher-logout-btn" type="button">Cerrar sesión</button>
+    <nav class="teacher-nav">
+      <button class="teacher-nav-btn active" type="button" data-teacher-view="overview"><span>▦</span> Resumen</button>
+      <button class="teacher-nav-btn" type="button" data-teacher-view="classrooms"><span>🏫</span> Ver salones</button>
+      <button class="teacher-nav-btn" type="button" data-teacher-view="create-classroom"><span>＋</span> Crear salón</button>
+      <button class="teacher-nav-btn" type="button" data-teacher-view="students"><span>🎓</span> Ver estudiantes</button>
+      <button class="teacher-nav-btn" type="button" data-teacher-view="classes"><span>📚</span> Crear clases</button>
+      <button class="teacher-nav-btn" type="button" data-teacher-view="quizzes"><span>🧪</span> Crear quiz</button>
+    </nav>
+    <div class="teacher-sidebar-account">
+      <div class="teacher-account-avatar" aria-hidden="true">VG</div>
+      <div><strong id="teacher-sidebar-name">Docente</strong><small id="teacher-account-chip"></small></div>
+      <button class="logout-btn" id="teacher-logout-btn" type="button">Salir</button>
     </div>
-  </header>
+  </aside>
 
-  <div class="teacher-main">
-    <section class="teacher-hero" aria-labelledby="teacher-title">
+  <div class="teacher-workspace">
+    <header class="teacher-header">
+      <button class="teacher-menu-btn" id="teacher-menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <div><strong id="teacher-view-title">Resumen</strong><small>Química Inorgánica · Grados <span id="teacher-header-grades">—</span></small></div>
+      <span class="teacher-live-badge"><i></i> Sesión docente</span>
+    </header>
+
+    <div class="teacher-main">
+    <section class="teacher-view active" data-view-panel="overview" aria-labelledby="teacher-title">
+      <section class="teacher-hero">
       <div>
-        <p class="teacher-eyebrow">ESPACIO DE TRABAJO</p>
+        <p class="teacher-eyebrow">PANEL DE CONTROL</p>
         <h1 id="teacher-title">Hola, <span id="teacher-name">docente</span></h1>
-        <p>Administra tus salones y consulta los estudiantes vinculados a tu grado.</p>
+        <p>Gestiona tus grupos, contenidos y avances desde un solo lugar.</p>
       </div>
       <div class="teacher-grade-card">
         <span>GRADO ASIGNADO</span>
         <strong id="teacher-grade">—</strong>
         <small>Los grados solo pueden ser asignados por un administrador.</small>
       </div>
-    </section>
-
-    <p class="teacher-status" id="teacher-status" role="status" aria-live="polite"></p>
-
-    <section class="teacher-stats" aria-label="Resumen de salones">
+      </section>
+      <section class="teacher-stats" aria-label="Resumen de salones">
       <article class="teacher-stat-card">
         <span>🏫</span><strong id="teacher-classroom-count">0</strong><small>Salones</small>
       </article>
@@ -62,12 +76,21 @@
         <span>🎓</span><strong id="teacher-student-count">0</strong><small>Estudiantes vinculados</small>
       </article>
       <article class="teacher-stat-card">
-        <span>🧪</span><strong id="teacher-module-count">0</strong><small>Quizzes publicados</small>
+        <span>📚</span><strong id="teacher-module-count">0</strong><small>Clases creadas</small>
       </article>
+      </section>
+      <section class="teacher-quick-grid">
+        <button type="button" data-go-view="create-classroom"><span>🏫</span><strong>Nuevo salón</strong><small>Genera un código para tus estudiantes</small></button>
+        <button type="button" data-go-view="students"><span>📈</span><strong>Revisar avances</strong><small>Consulta el progreso por grado</small></button>
+        <button type="button" data-go-view="classes"><span>📚</span><strong>Nueva clase</strong><small>Prepara contenido para un salón</small></button>
+        <button type="button" data-go-view="quizzes"><span>🧪</span><strong>Nuevo quiz</strong><small>Crea una evaluación para tu grupo</small></button>
+      </section>
     </section>
 
-    <div class="teacher-grid">
-      <section class="teacher-panel" aria-labelledby="create-classroom-title">
+    <p class="teacher-status" id="teacher-status" role="status" aria-live="polite"></p>
+
+    <section class="teacher-view" data-view-panel="create-classroom" hidden>
+      <section class="teacher-panel teacher-form-panel" aria-labelledby="create-classroom-title">
         <p class="teacher-panel-kicker">NUEVO SALÓN</p>
         <h2 id="create-classroom-title">Crear un salón</h2>
         <p>El código único de 6 dígitos se generará automáticamente.</p>
@@ -80,7 +103,9 @@
           <button class="teacher-primary-btn" id="create-classroom-btn" type="submit">Crear salón</button>
         </form>
       </section>
+    </section>
 
+    <section class="teacher-view" data-view-panel="classrooms" hidden>
       <section class="teacher-panel teacher-classrooms-panel" aria-labelledby="classrooms-title">
         <div class="teacher-panel-heading">
           <div>
@@ -94,9 +119,18 @@
         </div>
         <div class="teacher-classroom-list" id="teacher-classroom-list"></div>
       </section>
-    </div>
+    </section>
 
-    <section class="teacher-panel teacher-roster-panel" id="teacher-roster-panel" aria-labelledby="roster-title" hidden>
+    <section class="teacher-view" data-view-panel="students" hidden>
+      <section class="teacher-panel teacher-students-panel" aria-labelledby="students-view-title">
+        <div class="teacher-panel-heading">
+          <div><p class="teacher-panel-kicker">SEGUIMIENTO</p><h2 id="students-view-title">Estudiantes por grado</h2></div>
+          <label class="teacher-filter">Grado<select id="student-grade-filter"><option value="all">Todos</option></select></label>
+        </div>
+        <p>Selecciona un salón para ver nombres, avance general y actividad.</p>
+        <div class="teacher-student-classrooms" id="teacher-student-classrooms"></div>
+      </section>
+      <section class="teacher-panel teacher-roster-panel" id="teacher-roster-panel" aria-labelledby="roster-title" hidden>
       <div class="teacher-panel-heading">
         <div>
           <p class="teacher-panel-kicker">ESTUDIANTES</p>
@@ -107,16 +141,67 @@
       </div>
       <div class="teacher-empty" id="teacher-roster-empty">Ningún estudiante ha ingresado este código todavía.</div>
       <div class="teacher-roster-list" id="teacher-roster-list"></div>
+      </section>
     </section>
 
-    <section class="teacher-panel teacher-coming-next" aria-labelledby="summative-title">
-      <div>
-        <p class="teacher-panel-kicker">PANEL SUMATIVO</p>
-        <h2 id="summative-title">Quizzes del docente</h2>
-        <p>La creación, publicación y consulta de resultados de quizzes se añadirá sobre los salones ya configurados.</p>
-      </div>
-      <span class="teacher-phase-badge">SIGUIENTE FASE</span>
+    <section class="teacher-view" data-view-panel="classes" hidden>
+      <section class="teacher-panel teacher-form-panel">
+        <p class="teacher-panel-kicker">CONTENIDO</p><h2>Crear una clase</h2>
+        <p>Prepara una clase y asígnala a uno de tus grados.</p>
+        <form id="create-class-form">
+          <label for="class-title">Título de la clase</label><input id="class-title" minlength="2" maxlength="120" placeholder="Ejemplo: Enlaces químicos" required>
+          <label for="class-grade">Grado</label><select id="class-grade" required></select>
+          <label for="class-description">Descripción</label><textarea id="class-description" rows="5" maxlength="500" placeholder="Objetivo y contenido de la clase"></textarea>
+          <button class="teacher-primary-btn" type="submit">Guardar clase</button>
+        </form>
+      </section>
+      <div class="teacher-content-list" id="teacher-class-list"></div>
     </section>
+
+    <section class="teacher-view" data-view-panel="quizzes" hidden>
+      <section class="teacher-panel teacher-form-panel">
+        <p class="teacher-panel-kicker">EVALUACIÓN</p><h2>Crear un quiz</h2>
+        <p>Define el nombre, grado y número de preguntas. El editor detallado se abrirá después de guardar.</p>
+        <form id="create-quiz-form">
+          <label for="quiz-title">Nombre del quiz</label><input id="quiz-title" minlength="2" maxlength="120" placeholder="Ejemplo: Repaso de nomenclatura" required>
+          <label for="quiz-grade">Grado</label><select id="quiz-grade" required></select>
+          <label for="quiz-question-count">Número de preguntas</label><input id="quiz-question-count" type="number" min="1" max="20" value="5" required>
+          <button class="teacher-primary-btn" type="submit">Crear borrador</button>
+        </form>
+      </section>
+      <div class="teacher-content-list" id="teacher-quiz-list"></div>
+      <section class="teacher-panel teacher-quiz-editor" id="teacher-quiz-editor" hidden>
+        <div class="teacher-panel-heading">
+          <div><p class="teacher-panel-kicker">EDITOR DE PREGUNTAS</p><h2 id="quiz-editor-title">Quiz</h2><p id="quiz-editor-meta"></p></div>
+          <button class="teacher-secondary-btn" id="close-quiz-editor-btn" type="button">Cerrar editor</button>
+        </div>
+        <form id="quiz-question-form">
+          <label for="quiz-question-text">Pregunta</label>
+          <textarea id="quiz-question-text" rows="3" minlength="5" maxlength="500" placeholder="Escribe la pregunta" required></textarea>
+          <label>Imagen de la pregunta <small>(opcional)</small></label>
+          <div class="teacher-image-paste-zone" id="quiz-image-paste-zone" tabindex="0" role="button" aria-label="Pega aquí una imagen desde el portapapeles">
+            <span>🖼️</span><strong>Copia una imagen y presiona Ctrl+V aquí</strong><small>Se mostrará una vista previa antes de guardar.</small>
+          </div>
+          <div class="teacher-image-preview" id="quiz-image-preview" hidden>
+            <img id="quiz-image-preview-img" alt="Vista previa de la imagen pegada">
+            <button class="teacher-secondary-btn" id="remove-quiz-image-btn" type="button">Quitar imagen</button>
+          </div>
+          <div class="teacher-options-grid">
+            <label>Opción A<input id="quiz-option-a" minlength="1" maxlength="200" required></label>
+            <label>Opción B<input id="quiz-option-b" minlength="1" maxlength="200" required></label>
+            <label>Opción C<input id="quiz-option-c" minlength="1" maxlength="200" required></label>
+            <label>Opción D<input id="quiz-option-d" minlength="1" maxlength="200" required></label>
+          </div>
+          <label for="quiz-correct-option">Respuesta correcta</label>
+          <select id="quiz-correct-option" required><option value="0">Opción A</option><option value="1">Opción B</option><option value="2">Opción C</option><option value="3">Opción D</option></select>
+          <label for="quiz-explanation">Explicación de la respuesta</label>
+          <textarea id="quiz-explanation" rows="2" maxlength="500" placeholder="Explica por qué es correcta"></textarea>
+          <button class="teacher-primary-btn" id="save-quiz-question-btn" type="submit">Guardar pregunta</button>
+        </form>
+        <div class="teacher-question-list" id="teacher-question-list"></div>
+      </section>
+    </section>
+    </div>
   </div>
 </main>
 

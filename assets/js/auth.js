@@ -17,6 +17,8 @@ function showStudentAccount(profile, session) {
   accountChip.hidden = false;
   accountChip.textContent = profile.full_name || profile.email || session.user.email || 'Cuenta de Google';
   accountChip.title = profile.email || session.user.email || '';
+  window.chemquestCurrentStudentId = profile.id;
+  window.chemquestLoadCloudProgress?.(profile.id);
 }
 
 function showSignedOut() {
@@ -26,6 +28,7 @@ function showSignedOut() {
   accountChip.hidden = true;
   setLogoutState(false);
   window.chemquestTeacher?.reset();
+  window.chemquestCurrentStudentId = null;
 }
 
 async function showAuthenticatedExperience(session) {

@@ -50,6 +50,48 @@ create table if not exists public.study_modules (
   updated_at timestamptz not null default now()
 );
 
+-- Avance acumulado del estudiante. La página mantiene una copia local y la
+-- sincroniza aquí para que el docente pueda consultarla desde sus salones.
+create table if not exists public.student_progress (
+  student_id uuid primary key references public.profiles(id) on delete cascade,
+  total_xp integer not null default 0 check (total_xp >= 0),
+  level integer not null default 1 check (level >= 1),
+  completed_days jsonb not null default '[]'::jsonb,
+  day_results jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+-- Borradores y cuestionarios creados por el docente.
+create table if not exists public.teacher_quizzes (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (char_length(trim(title)) between 2 and 120),
+  grade smallint not null check (grade in (8, 10)),
+  question_count smallint not null default 5 check (question_count between 1 and 20),
+  status text not null default 'draft' check (status in ('draft', 'published', 'closed')),
+  created_by uuid not null references public.profiles(id) on delete restrict,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.quiz_questions (
+  id uuid primary key default gen_random_uuid(),
+  quiz_id uuid not null references public.teacher_quizzes(id) on delete cascade,
+  prompt text not null check (char_length(trim(prompt)) between 5 and 500),
+  image_url text,
+  option_a text not null check (char_length(trim(option_a)) between 1 and 200),
+  option_b text not null check (char_length(trim(option_b)) between 1 and 200),
+  option_c text not null check (char_length(trim(option_c)) between 1 and 200),
+  option_d text not null check (char_length(trim(option_d)) between 1 and 200),
+  correct_option smallint not null check (correct_option between 0 and 3),
+  explanation text not null default '',
+  position smallint not null check (position between 1 and 20),
+  created_at timestamptz not null default now(),
+  unique (quiz_id, position)
+);
+
+-- Permite actualizar instalaciones creadas antes de añadir imágenes.
+alter table public.quiz_questions add column if not exists image_url text;
+
 -- Relación entre estudiantes y salones.
 create table if not exists public.classroom_members (
   classroom_id uuid not null references public.classrooms(id) on delete cascade,
@@ -69,10 +111,18 @@ create table if not exists public.classroom_modules (
 
 create index if not exists classrooms_teacher_idx
   on public.classrooms(teacher_id);
+-- Un docente no puede repetir el nombre de un salón dentro del mismo grado.
+-- Se ignoran mayúsculas, minúsculas y espacios al inicio o al final.
+create unique index if not exists classrooms_teacher_grade_name_unique_idx
+  on public.classrooms(teacher_id, grade, lower(btrim(name)));
 create index if not exists classroom_members_student_idx
   on public.classroom_members(student_id);
 create index if not exists study_modules_creator_idx
   on public.study_modules(created_by);
+create index if not exists teacher_quizzes_creator_idx
+  on public.teacher_quizzes(created_by);
+create index if not exists quiz_questions_quiz_idx
+  on public.quiz_questions(quiz_id, position);
 
 -- Amplía el alta automática de perfiles: los correos autorizados nacen como
 -- docentes y reciben todos sus grados; las demás cuentas nacen como estudiantes.
@@ -196,18 +246,34 @@ create trigger set_module_updated_at_before_update
   before update on public.study_modules
   for each row execute function private.set_profile_updated_at();
 
+drop trigger if exists set_student_progress_updated_at_before_update on public.student_progress;
+create trigger set_student_progress_updated_at_before_update
+  before update on public.student_progress
+  for each row execute function private.set_profile_updated_at();
+
+drop trigger if exists set_teacher_quiz_updated_at_before_update on public.teacher_quizzes;
+create trigger set_teacher_quiz_updated_at_before_update
+  before update on public.teacher_quizzes
+  for each row execute function private.set_profile_updated_at();
+
 -- RLS es la barrera que impide consultar o cambiar datos ajenos.
 alter table public.classrooms enable row level security;
 alter table public.study_modules enable row level security;
 alter table public.classroom_members enable row level security;
 alter table public.classroom_modules enable row level security;
 alter table public.teacher_grades enable row level security;
+alter table public.student_progress enable row level security;
+alter table public.teacher_quizzes enable row level security;
+alter table public.quiz_questions enable row level security;
 
 revoke all on public.classrooms from anon, authenticated;
 revoke all on public.study_modules from anon, authenticated;
 revoke all on public.classroom_members from anon, authenticated;
 revoke all on public.classroom_modules from anon, authenticated;
 revoke all on public.teacher_grades from anon, authenticated;
+revoke all on public.student_progress from anon, authenticated;
+revoke all on public.teacher_quizzes from anon, authenticated;
+revoke all on public.quiz_questions from anon, authenticated;
 
 grant select, insert, delete on public.classrooms to authenticated;
 grant update (name) on public.classrooms to authenticated;
@@ -216,6 +282,60 @@ grant update (title, description) on public.study_modules to authenticated;
 grant select, insert, delete on public.classroom_members to authenticated;
 grant select, insert, delete on public.classroom_modules to authenticated;
 grant select on public.teacher_grades to authenticated;
+grant select, insert on public.student_progress to authenticated;
+grant update (total_xp, level, completed_days, day_results) on public.student_progress to authenticated;
+grant select, insert, delete on public.teacher_quizzes to authenticated;
+grant update (title, grade, question_count, status) on public.teacher_quizzes to authenticated;
+grant select, insert, update, delete on public.quiz_questions to authenticated;
+
+drop policy if exists "Students manage their progress" on public.student_progress;
+create policy "Students manage their progress"
+  on public.student_progress for all to authenticated
+  using (student_id = (select auth.uid()))
+  with check (student_id = (select auth.uid()) and private.current_user_role() = 'student');
+
+drop policy if exists "Teachers read classroom progress" on public.student_progress;
+create policy "Teachers read classroom progress"
+  on public.student_progress for select to authenticated
+  using (
+    private.current_user_role() = 'admin'
+    or exists (
+      select 1 from public.classrooms classroom
+      join public.classroom_members membership on membership.classroom_id = classroom.id
+      where classroom.teacher_id = (select auth.uid())
+        and membership.student_id = student_progress.student_id
+    )
+  );
+
+drop policy if exists "Teachers manage their quizzes" on public.teacher_quizzes;
+create policy "Teachers manage their quizzes"
+  on public.teacher_quizzes for all to authenticated
+  using (created_by = (select auth.uid()) or private.current_user_role() = 'admin')
+  with check (
+    (created_by = (select auth.uid()) and private.current_user_role() = 'teacher'
+      and exists (select 1 from public.teacher_grades assignment where assignment.teacher_id = (select auth.uid()) and assignment.grade = teacher_quizzes.grade))
+    or private.current_user_role() = 'admin'
+  );
+
+drop policy if exists "Teachers manage quiz questions" on public.quiz_questions;
+create policy "Teachers manage quiz questions"
+  on public.quiz_questions for all to authenticated
+  using (
+    private.current_user_role() = 'admin'
+    or exists (
+      select 1 from public.teacher_quizzes quiz
+      where quiz.id = quiz_questions.quiz_id
+        and quiz.created_by = (select auth.uid())
+    )
+  )
+  with check (
+    private.current_user_role() = 'admin'
+    or exists (
+      select 1 from public.teacher_quizzes quiz
+      where quiz.id = quiz_questions.quiz_id
+        and quiz.created_by = (select auth.uid())
+    )
+  );
 
 drop policy if exists "Teachers read their assigned grades" on public.teacher_grades;
 create policy "Teachers read their assigned grades"
