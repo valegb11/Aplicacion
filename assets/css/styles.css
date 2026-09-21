@@ -812,11 +812,35 @@ body{
 }
 .google-login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(34,211,238,.18)}
 .google-login-btn:disabled{cursor:wait;opacity:.65;transform:none}
+.google-register-btn{width:100%;padding:.9rem 1rem;border:1px solid var(--cyan);border-radius:12px;background:rgba(34,211,238,.07);color:var(--cyan);font-family:var(--font-body);font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.75rem;transition:transform .18s,background .18s}
+.google-register-btn:hover{transform:translateY(-2px);background:rgba(34,211,238,.13)}
+.google-register-btn:disabled{cursor:wait;opacity:.65;transform:none}
+.auth-divider{display:flex;align-items:center;gap:.75rem;margin:1rem 0;color:var(--muted);font-size:.72rem;font-weight:800}
+.auth-divider::before,.auth-divider::after{content:"";height:1px;flex:1;background:var(--border)}
+.register-form{display:grid;gap:.7rem;margin-top:1rem;text-align:left}
+.register-form[hidden]{display:none}
+.register-form label{font-size:.76rem;font-weight:800;color:var(--dim)}
+.register-form input{width:100%;padding:.85rem;border:1px solid var(--border2);border-radius:11px;background:var(--bg2);color:var(--text);font:700 .92rem var(--font-body);outline:none}
+.register-form input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+#register-classroom-code{font-family:var(--font-game);font-size:1.1rem;letter-spacing:.25em;text-align:center}
 .google-mark{font-size:1.15rem;font-weight:900;color:#4285f4}
 .auth-status{min-height:1.3rem;margin:.85rem 0 0;color:var(--red);font-size:.82rem;font-weight:700}
 .auth-note{margin:1rem 0 0;color:var(--muted);font-size:.72rem;line-height:1.5}
 .auth-note a,.legal-back{color:var(--cyan);text-decoration:none}
 .auth-note a:hover,.legal-back:hover{text-decoration:underline}
+.student-join-screen{min-height:100vh;padding:2rem;display:grid;place-items:center;position:relative;z-index:20;background:radial-gradient(circle at 25% 20%,rgba(34,211,238,.13),transparent 35%),radial-gradient(circle at 78% 78%,rgba(74,222,128,.12),transparent 38%),var(--bg)}
+.student-join-screen[hidden]{display:none}
+.student-join-card{width:min(100%,460px);padding:2.5rem;border:1px solid var(--border);border-radius:24px;background:rgba(15,23,42,.96);box-shadow:0 24px 80px rgba(0,0,0,.45);text-align:center}
+.student-join-card h1{margin:.4rem 0 .8rem;font-family:var(--font-game);font-size:clamp(1.35rem,5vw,2rem)}
+.student-join-card form{display:grid;gap:.8rem;text-align:left}
+.student-join-card label{font-size:.78rem;font-weight:800;color:var(--dim)}
+.student-join-card input{width:100%;padding:1rem;border:1px solid var(--border2);border-radius:12px;background:var(--bg2);color:var(--text);font:900 1.35rem var(--font-game);letter-spacing:.35em;text-align:center;outline:none}
+.student-join-card input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+.student-join-btn{padding:.9rem 1rem;border:0;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--green));color:#07111d;font-family:var(--font-body);font-size:1rem;font-weight:900;cursor:pointer}
+.student-join-btn:disabled{cursor:wait;opacity:.65}
+.student-join-logout{border:0;background:none;color:var(--muted);font-family:var(--font-body);font-weight:800;cursor:pointer}
+.student-join-logout:hover{color:var(--cyan)}
+.grade-btn[hidden]{display:none}
 .account-chip{max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--cyan);font-size:.78rem;font-weight:800}
 .logout-btn{
   border:1px solid var(--border);border-radius:999px;padding:.55rem .85rem;background:var(--card);color:var(--muted);

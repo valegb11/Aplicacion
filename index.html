@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ChemQuest — Química Inorgánica</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css?v=2">
+<link rel="stylesheet" href="assets/css/styles.css?v=3">
 </head>
 <body>
 
@@ -18,10 +18,43 @@
     <p class="auth-description">Aprende química, completa desafíos y conserva tu progreso en cualquier dispositivo.</p>
     <button class="google-login-btn" id="google-login-btn" type="button">
       <span class="google-mark" aria-hidden="true">G</span>
-      Continuar con Google
+      Iniciar sesión con Google
     </button>
+    <div class="auth-divider"><span>¿Primera vez en ChemQuest?</span></div>
+    <button class="google-register-btn" id="google-register-btn" type="button">
+      <span class="google-mark" aria-hidden="true">G</span>
+      Registrarme con Google
+    </button>
+    <form class="register-form" id="register-form" hidden>
+      <label for="register-name">Nombre completo</label>
+      <input id="register-name" type="text" minlength="3" maxlength="100" autocomplete="name" placeholder="Tu nombre y apellido" required>
+      <label for="register-email">Correo electrónico</label>
+      <input id="register-email" type="email" maxlength="255" autocomplete="email" placeholder="nombre@correo.com" required>
+      <label for="register-classroom-code">Código del salón</label>
+      <input id="register-classroom-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required>
+      <button class="student-join-btn" id="register-submit-btn" type="submit">Continuar el registro con Google</button>
+      <button class="student-join-logout" id="register-cancel-btn" type="button">Cancelar</button>
+    </form>
     <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
     <p class="auth-note">Usaremos tu nombre, correo y foto únicamente para identificar tu cuenta en ChemQuest. <a href="privacy.html">Consulta nuestra política de privacidad</a>.</p>
+  </section>
+</main>
+
+<!-- ════ VINCULACIÓN DEL ESTUDIANTE ════ -->
+<main class="student-join-screen" id="student-join-screen" hidden>
+  <section class="student-join-card" aria-labelledby="student-join-title">
+    <div class="auth-logo" aria-hidden="true">🏫</div>
+    <p class="auth-eyebrow">ACCESO DEL ESTUDIANTE</p>
+    <h1 id="student-join-title">Ingresa a tu salón</h1>
+    <p class="auth-description">Escribe el código de 6 dígitos que te entregó tu docente. Así verás únicamente las clases de tu grado.</p>
+    <form id="student-join-form">
+      <label for="student-classroom-code">Código del salón</label>
+      <input id="student-classroom-code" name="classroom-code" type="text" inputmode="numeric"
+        autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required>
+      <button class="student-join-btn" id="student-join-btn" type="submit">Entrar al salón</button>
+    </form>
+    <p class="auth-status" id="student-join-status" role="status" aria-live="polite"></p>
+    <button class="student-join-logout" id="student-join-logout-btn" type="button">Cerrar sesión</button>
   </section>
 </main>
 
@@ -227,7 +260,7 @@
 
   <div class="home-body">
     <!-- Grade selector -->
-    <div style="font-family:var(--font-game);font-size:.65rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:1.5rem">Selecciona tu grado</div>
+    <div id="student-grade-heading" style="font-family:var(--font-game);font-size:.65rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:1.5rem">Tu grado</div>
     <div class="grade-selector">
       <button class="grade-btn active" id="btn-8" onclick="selectGrade(8)"
         style="--gb-color:#4ade80;--gb-color-alpha:rgba(74,222,128,.06)">
@@ -337,7 +370,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="assets/js/supabase-client.js"></script>
 <script src="assets/js/teacher.js"></script>
-<script src="assets/js/auth.js?v=2"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=2"></script>
+<script src="assets/js/auth.js?v=6"></script>
 </body>
 </html>

@@ -1085,6 +1085,7 @@ function renderHome(){
 }
 
 function selectGrade(g){
+  if(window.chemquestStudentGrade && g !== window.chemquestStudentGrade) return;
   state.grade = g;
   saveState();
   renderHome();
@@ -1101,6 +1102,19 @@ function selectGrade(g){
   // Forzar recarga para asegurar que se visualizan los cambios de grado
   setTimeout(()=>{ location.reload(); }, 500);
 }
+
+window.chemquestSetStudentGrade = function(grade){
+  const normalizedGrade = Number(grade);
+  if(!DAYS[normalizedGrade]) return false;
+  window.chemquestStudentGrade = normalizedGrade;
+  state.grade = normalizedGrade;
+  document.getElementById('btn-8').hidden = normalizedGrade !== 8;
+  document.getElementById('btn-10').hidden = normalizedGrade !== 10;
+  document.getElementById('student-grade-heading').textContent = `Tu salón · Grado ${normalizedGrade}`;
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(_error){}
+  renderHome();
+  return true;
+};
 
 function updateStreak(){
   const today = new Date().toDateString();
