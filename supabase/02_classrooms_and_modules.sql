@@ -1,6 +1,5 @@
 -- ChemQuest: estructura académica inicial.
--- IMPORTANTE: este archivo está preparado para una etapa posterior.
--- No lo ejecutes en Supabase hasta revisarlo junto con el equipo.
+-- Ejecutar después de 01_profiles.sql.
 
 -- Un docente puede tener uno o varios grados autorizados. Los estudiantes no
 -- guardan un grado: este se obtiene del salón al que pertenecen.
@@ -19,6 +18,9 @@ create table if not exists private.teacher_defaults (
   primary key (email, grade),
   check (email = lower(trim(email)))
 );
+
+alter table private.teacher_defaults enable row level security;
+revoke all on private.teacher_defaults from public, anon, authenticated;
 
 insert into private.teacher_defaults (email, grade)
 values

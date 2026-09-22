@@ -13,7 +13,7 @@ Así podemos saber exactamente qué se creó y repetirlo si fuera necesario.
 - reglas para que cada persona solo consulte su propia ficha;
 - una restricción que impide cambiar el rol desde la página web.
 
-`02_classrooms_and_modules.sql` está preparado para el siguiente paso y crea:
+`02_classrooms_and_modules.sql` crea:
 
 - los grados asignados al docente, limitados a 8.º y 10.º;
 - salones pertenecientes a docentes;
@@ -24,8 +24,11 @@ Así podemos saber exactamente qué se creó y repetirlo si fuera necesario.
 - reglas para que cada persona vea o modifique únicamente lo permitido;
 - acceso del docente a los perfiles de los estudiantes de sus propios salones.
 
-Este segundo archivo **todavía no debe ejecutarse**. Primero hay que revisar el
-rol de la cuenta docente y hacer las pruebas guiadas en Supabase.
+Este segundo archivo se aplicó el 21 de septiembre de 2026. Se verificaron las
+ocho tablas académicas con RLS activado, el rol docente y los grados 8 y 10 de
+la cuenta predeterminada. El acceso por código requiere autenticación.
+La tabla interna `private.teacher_defaults` también tiene RLS activado y no
+concede acceso directo a los roles `anon` ni `authenticated`.
 
 Después de ejecutarlo, `verify_02_classrooms_and_modules.sql` comprueba las
 tablas y sus reglas sin modificar información. `TOMORROW_CHECKLIST.md` contiene
