@@ -18,6 +18,7 @@ const logoutButtons = document.querySelectorAll('#logout-btn, #teacher-logout-bt
 const authStatus = document.getElementById('auth-status');
 const accountChip = document.getElementById('account-chip');
 const DEFAULT_TEACHER_EMAIL = 'valentina.gonzalez@gimsaber.edu.co';
+let displayedUserId = null;
 
 function isDefaultTeacher(profile, session) {
   const email = (profile.email || session.user.email || '').trim().toLowerCase();
@@ -71,6 +72,7 @@ function showStudentJoin() {
 }
 
 function showSignedOut() {
+  displayedUserId = null;
   authScreen.hidden = false;
   appShell.hidden = true;
   teacherShell.hidden = true;
@@ -241,6 +243,7 @@ async function handleSession(session) {
   studentJoinScreen.hidden = true;
   authStatus.textContent = 'Preparando tu espacio…';
   await showAuthenticatedExperience(session);
+  if (authScreen.hidden) displayedUserId = session.user.id;
 }
 
 async function initializeAuthentication() {
@@ -265,7 +268,12 @@ async function initializeAuthentication() {
   await handleSession(data.session);
 
   window.chemquestSupabase.auth.onAuthStateChange((_event, session) => {
-    setTimeout(() => handleSession(session), 0);
+    // Google/Supabase can reaffirm the same session when the tab regains focus.
+    // Keep the current view and drafts; only rebuild for a different account.
+    setTimeout(() => {
+      if (session && session.user.id === displayedUserId) return;
+      handleSession(session);
+    }, 0);
   });
 }
 
