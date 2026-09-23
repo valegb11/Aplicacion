@@ -148,19 +148,25 @@
       .select('quiz_id, student_id, score, total_questions, xp_earned, attempted_at').in('quiz_id', quizIds).order('attempted_at', { ascending: false });
     if (error) { setStatus(`No se pudieron cargar las notas: ${error.message}`, 'error'); $('refresh-quiz-results-btn').disabled = false; return; }
     const studentIds = [...new Set(attempts.map(attempt => attempt.student_id))];
-    let profiles = [];
+    let profiles = []; let progressRows = [];
     if (studentIds.length) {
-      const result = await window.chemquestSupabase.from('profiles').select('id, full_name, email').in('id', studentIds);
-      if (!result.error) profiles = result.data || [];
+      const [profileResult, progressResult] = await Promise.all([
+        window.chemquestSupabase.from('profiles').select('id, full_name, email').in('id', studentIds),
+        window.chemquestSupabase.from('student_progress').select('student_id, total_xp').in('student_id', studentIds)
+      ]);
+      if (!profileResult.error) profiles = profileResult.data || [];
+      if (!progressResult.error) progressRows = progressResult.data || [];
     }
     const profileById = Object.fromEntries(profiles.map(profile => [profile.id, profile]));
+    const progressById = Object.fromEntries(progressRows.map(progress => [progress.student_id, progress]));
     const quizById = Object.fromEntries(quizDrafts.map(quiz => [quiz.id, quiz]));
     quizResultsEmpty.hidden = attempts.length > 0;
     quizResultsList.innerHTML = attempts.map(attempt => {
       const profile = profileById[attempt.student_id] || {};
       const quiz = quizById[attempt.quiz_id] || {};
       const percent = attempt.total_questions ? Math.round((attempt.score / attempt.total_questions) * 100) : 0;
-      return `<article class="teacher-quiz-result-card"><div><strong>${escapeHtml(profile.full_name || profile.email || 'Estudiante')}</strong><small>${escapeHtml(profile.email || '')}</small></div><div><strong>${escapeHtml(quiz.title || 'Quiz')}</strong><small>Grado ${quiz.grade || '—'}</small></div><div class="teacher-quiz-grade"><b>${attempt.score}/${attempt.total_questions}</b><span>${percent}% · ${attempt.xp_earned} XP</span></div><time>${escapeHtml(formatDate(attempt.attempted_at))}</time></article>`;
+      const totalXP = progressById[attempt.student_id]?.total_xp || 0;
+      return `<article class="teacher-quiz-result-card"><div><strong>${escapeHtml(profile.full_name || profile.email || 'Estudiante')}</strong><small>${escapeHtml(profile.email || '')}</small></div><div><strong>${escapeHtml(quiz.title || 'Quiz')}</strong><small>Grado ${quiz.grade || '—'}</small></div><div class="teacher-quiz-grade"><b>${attempt.score}/${attempt.total_questions}</b><span>${percent}% · ${attempt.xp_earned} EXP del quiz</span><small>${totalXP} EXP total</small></div><time>${escapeHtml(formatDate(attempt.attempted_at))}</time></article>`;
     }).join('');
     $('refresh-quiz-results-btn').disabled = false;
   }
@@ -278,7 +284,7 @@
     $('teacher-roster-empty').hidden = memberships.length > 0;
     rosterList.innerHTML = memberships.map(membership => { const profile = byId[membership.student_id] || {}; const progress = progressById[membership.student_id] || {}; const displayName = profile.full_name || profile.email || 'Estudiante'; const completedDays = progress.completed_days || []; const builtInCompleted = completedDays.filter(day => String(day).startsWith(`d${selectedClassroom.grade}-`)).length; const teacherCompleted = assignedModuleIds.filter(id => completedDays.includes(id)).length; const completed = builtInCompleted + teacherCompleted; const totalClasses = 6 + assignedModuleIds.length; const percent = Math.round((completed / totalClasses) * 100); return `<article class="teacher-roster-item">
       <div class="teacher-avatar">${escapeHtml(displayName.charAt(0).toUpperCase() || 'E')}</div><div class="teacher-student-identity"><strong>${escapeHtml(displayName)}</strong><small>${escapeHtml(profile.email || '')}</small></div>
-      <div class="teacher-progress"><div><span>Avance general</span><b>${percent}%</b></div><div class="teacher-progress-track"><i style="width:${percent}%"></i></div><small>${completed} de ${totalClasses} clases · ${progress.total_xp || 0} XP · Nivel ${progress.level || 1}</small></div><div class="teacher-roster-date">${progress.updated_at ? `Actividad ${escapeHtml(formatDate(progress.updated_at))}` : `Desde ${escapeHtml(formatDate(membership.joined_at))}`}</div>
+      <div class="teacher-progress"><div><span>Avance general</span><b>${percent}%</b></div><div class="teacher-progress-track"><i style="width:${percent}%"></i></div><small>${completed} de ${totalClasses} clases · ${progress.total_xp || 0} EXP · Nivel ${progress.level || 1}</small></div><div class="teacher-roster-date">${progress.updated_at ? `Actividad ${escapeHtml(formatDate(progress.updated_at))}` : `Desde ${escapeHtml(formatDate(membership.joined_at))}`}</div>
     </article>`; }).join(''); setStatus('');
   }
 

@@ -908,6 +908,7 @@ window.chemquestCompleteTeacherClass = function(moduleId){
   state.totalXP += 30;
   while(state.level < XP_PER_LEVEL.length-1 && state.totalXP >= XP_PER_LEVEL[state.level]) state.level++;
   saveState(); renderHome();
+  window.chemquestFlushCloudProgress?.();
   return true;
 };
 
@@ -917,22 +918,29 @@ window.chemquestAwardTeacherQuizXP = function(xp){
   state.totalXP += awarded;
   while(state.level < XP_PER_LEVEL.length-1 && state.totalXP >= XP_PER_LEVEL[state.level]) state.level++;
   saveState(); renderHome();
+  window.chemquestFlushCloudProgress?.();
 };
+
+async function syncCloudProgress(){
+  if(!window.chemquestSupabase || !window.chemquestCurrentStudentId) return;
+  clearTimeout(cloudSyncTimer);
+  const { error } = await window.chemquestSupabase.from('student_progress').upsert({
+    student_id: window.chemquestCurrentStudentId,
+    total_xp: state.totalXP,
+    level: state.level,
+    completed_days: state.completedDays,
+    day_results: state.dayResults
+  }, { onConflict: 'student_id' });
+  if(error) console.warn('No se pudo sincronizar el avance:', error.message);
+}
 
 function scheduleCloudProgressSync(){
   if(!window.chemquestSupabase || !window.chemquestCurrentStudentId) return;
   clearTimeout(cloudSyncTimer);
-  cloudSyncTimer = setTimeout(async()=>{
-    const { error } = await window.chemquestSupabase.from('student_progress').upsert({
-      student_id: window.chemquestCurrentStudentId,
-      total_xp: state.totalXP,
-      level: state.level,
-      completed_days: state.completedDays,
-      day_results: state.dayResults
-    }, { onConflict: 'student_id' });
-    if(error) console.warn('No se pudo sincronizar el avance:', error.message);
-  }, 500);
+  cloudSyncTimer = setTimeout(syncCloudProgress, 500);
 }
+
+window.chemquestFlushCloudProgress = syncCloudProgress;
 
 window.chemquestLoadCloudProgress = async function(studentId){
   window.chemquestCurrentStudentId = studentId;
