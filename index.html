@@ -71,7 +71,7 @@
       <button class="teacher-nav-btn" type="button" data-teacher-view="create-classroom"><span>＋</span> Crear salón</button>
       <button class="teacher-nav-btn" type="button" data-teacher-view="students"><span>🎓</span> Ver estudiantes</button>
       <button class="teacher-nav-btn" type="button" data-teacher-view="classes"><span>📚</span> Crear clases</button>
-      <button class="teacher-nav-btn" type="button" data-teacher-view="quizzes"><span>🧪</span> Crear quiz</button>
+      <button class="teacher-nav-btn" type="button" data-teacher-view="quizzes"><span>🧪</span> Quizzes</button>
     </nav>
     <div class="teacher-sidebar-account">
       <div class="teacher-account-avatar" aria-hidden="true">VG</div>
@@ -203,6 +203,14 @@
         </form>
       </section>
       <div class="teacher-content-list" id="teacher-quiz-list"></div>
+      <section class="teacher-panel teacher-quiz-results-panel">
+        <div class="teacher-panel-heading">
+          <div><p class="teacher-panel-kicker">CALIFICACIONES</p><h2>Notas de los quizzes</h2><p>Resultados de los estudiantes en tus quizzes publicados.</p></div>
+          <button class="teacher-secondary-btn" id="refresh-quiz-results-btn" type="button">Actualizar notas</button>
+        </div>
+        <div class="teacher-empty" id="teacher-quiz-results-empty">Todavía no hay resultados de quizzes.</div>
+        <div class="teacher-quiz-results" id="teacher-quiz-results"></div>
+      </section>
       <section class="teacher-panel teacher-quiz-editor" id="teacher-quiz-editor" hidden>
         <div class="teacher-panel-heading">
           <div><p class="teacher-panel-kicker">EDITOR DE PREGUNTAS</p><h2 id="quiz-editor-title">Quiz</h2><p id="quiz-editor-meta"></p></div>
@@ -317,7 +325,7 @@
       <span style="font-size:2rem">⚗️</span>
       <div>
         <div style="font-family:var(--font-game);font-size:.65rem;color:var(--purple);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.2rem">Tabla Periódica Interactiva</div>
-        <div style="color:var(--dim);font-size:.82rem">Explora elementos · Grado 10: desafío de configuración electrónica</div>
+        <div id="periodic-grade-description" style="color:var(--dim);font-size:.82rem">Explora elementos · Grado 8</div>
       </div>
       <span style="margin-left:auto;color:var(--purple);font-size:1.2rem">→</span>
     </button>
@@ -386,9 +394,9 @@
 <!-- Librería que permite que ChemQuest se comunique con Supabase. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="assets/js/supabase-client.js"></script>
-<script src="assets/js/teacher.js?v=2"></script>
-<script src="assets/js/app.js?v=2"></script>
-<script src="assets/js/student-classes.js?v=1"></script>
+<script src="assets/js/teacher.js?v=3"></script>
+<script src="assets/js/app.js?v=3"></script>
+<script src="assets/js/student-classes.js?v=2"></script>
 <script src="assets/js/auth.js?v=8"></script>
 </body>
 </html>

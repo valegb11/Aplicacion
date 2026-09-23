@@ -39,5 +39,8 @@ comparte automáticamente las clases y quizzes con los salones del mismo grado,
 y permite que los estudiantes lean únicamente los quizzes publicados y sus
 preguntas. También vincula el contenido que existía antes de ejecutar el archivo.
 
+`04_quiz_attempts.sql` guarda la mejor nota de cada estudiante en los quizzes
+del docente y calcula de forma segura la experiencia obtenida.
+
 Ejecuta los archivos en orden y solo después de revisar cada paso. Nunca pegues
 aquí contraseñas, claves `secret` o `service_role`.

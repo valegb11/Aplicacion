@@ -896,6 +896,29 @@ function saveState(){
   scheduleCloudProgressSync();
 }
 
+window.chemquestIsTeacherClassComplete = function(moduleId){
+  return state.completedDays.includes(`module:${moduleId}`);
+};
+
+window.chemquestCompleteTeacherClass = function(moduleId){
+  const progressId = `module:${moduleId}`;
+  if(state.completedDays.includes(progressId)) return false;
+  state.completedDays.push(progressId);
+  state.dayResults[progressId] = { type:'teacher-class', completed:true, xp:30, date:new Date().toLocaleDateString('es') };
+  state.totalXP += 30;
+  while(state.level < XP_PER_LEVEL.length-1 && state.totalXP >= XP_PER_LEVEL[state.level]) state.level++;
+  saveState(); renderHome();
+  return true;
+};
+
+window.chemquestAwardTeacherQuizXP = function(xp){
+  const awarded = Math.max(0, Number(xp) || 0);
+  if(!awarded) return;
+  state.totalXP += awarded;
+  while(state.level < XP_PER_LEVEL.length-1 && state.totalXP >= XP_PER_LEVEL[state.level]) state.level++;
+  saveState(); renderHome();
+};
+
 function scheduleCloudProgressSync(){
   if(!window.chemquestSupabase || !window.chemquestCurrentStudentId) return;
   clearTimeout(cloudSyncTimer);
@@ -1041,6 +1064,10 @@ function renderHome(){
   document.getElementById('xp-fill').style.width = pct+'%';
   document.getElementById('xp-label').textContent = state.totalXP+' / '+(XP_PER_LEVEL[lvl]||'MAX')+' XP';
   document.getElementById('level-num').textContent = lvl;
+  const periodicDescription = document.getElementById('periodic-grade-description');
+  if(periodicDescription) periodicDescription.textContent = state.grade === 10
+    ? 'Explora elementos · Grado 10: desafío de configuración electrónica'
+    : 'Explora elementos · Grado 8';
   // Grade buttons
   document.getElementById('btn-8').classList.toggle('active', state.grade===8);
   document.getElementById('btn-10').classList.toggle('active', state.grade===10);

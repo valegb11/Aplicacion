@@ -1012,6 +1012,11 @@ body{
 .student-content-column .teacher-panel{position:relative;z-index:1;margin-top:.65rem;transition:transform .18s,border-color .18s,background .18s}
 .student-content-column .teacher-panel:hover{transform:translateX(4px);border-color:var(--cyan);background:rgba(20,31,51,.98)}
 .student-content-quizzes .teacher-panel:hover{border-color:var(--purple)}
+.student-complete-class,.student-submit-quiz{margin-top:1rem;width:100%}
+.student-quiz-options{display:grid;gap:.45rem;margin:.75rem 0}
+.student-quiz-options label{padding:.7rem;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--dim);cursor:pointer}
+.student-quiz-options label:has(input:checked){border-color:var(--purple);background:rgba(167,139,250,.08);color:var(--text)}
+.student-quiz-result{margin:.75rem 0 0!important;color:var(--green)!important;font-weight:800}
 .teacher-classroom-list{grid-template-columns:repeat(auto-fit,minmax(310px,1fr));margin-top:1rem}
 .teacher-classroom-card{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:.85rem;text-align:left;cursor:default}
 .teacher-classroom-card:hover{transform:none}.teacher-classroom-icon{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;background:rgba(34,211,238,.1);color:var(--cyan);font-size:1.3rem}
@@ -1032,6 +1037,7 @@ body{
 .teacher-image-paste-zone{min-height:145px;padding:1.25rem;border:2px dashed var(--border2);border-radius:15px;background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;text-align:center;cursor:text;outline:none;transition:.2s}.teacher-image-paste-zone:hover,.teacher-image-paste-zone:focus{border-color:var(--cyan);background:rgba(34,211,238,.05);box-shadow:0 0 0 3px rgba(34,211,238,.08)}.teacher-image-paste-zone>span{font-size:2rem}.teacher-image-paste-zone>strong{font-size:.86rem}.teacher-image-paste-zone>small{color:var(--muted)}
 .teacher-image-paste-zone[hidden]{display:none}
 .teacher-image-preview{padding:1rem;border:1px solid var(--border);border-radius:15px;background:var(--bg2)}.teacher-image-preview[hidden]{display:none}.teacher-image-preview img{display:block;width:min(100%,560px);max-height:320px;object-fit:contain;margin:0 auto 1rem;border-radius:12px;background:#fff}.teacher-image-preview button{display:block;margin:0 auto}
+.teacher-quiz-results-panel{margin-top:1rem}.teacher-quiz-results{display:grid;gap:.65rem}.teacher-quiz-result-card{display:grid;grid-template-columns:1.2fr 1.2fr auto auto;align-items:center;gap:1rem;padding:.9rem;border:1px solid var(--border);border-radius:13px;background:var(--bg2)}.teacher-quiz-result-card>div{display:grid}.teacher-quiz-result-card small,.teacher-quiz-result-card time{color:var(--muted);font-size:.7rem}.teacher-quiz-grade{text-align:center}.teacher-quiz-grade b{color:var(--cyan);font:700 .85rem var(--font-game)}
 
 @media(max-width:900px){
   .teacher-shell{grid-template-columns:1fr}.teacher-workspace{grid-column:1}.teacher-sidebar{transform:translateX(-105%);transition:transform .25s;box-shadow:18px 0 50px rgba(0,0,0,.45)}.teacher-shell.menu-open .teacher-sidebar{transform:translateX(0)}
@@ -1044,4 +1050,5 @@ body{
   .teacher-classroom-card{grid-template-columns:42px 1fr}.classroom-code-wrap{grid-column:1/-1;text-align:left}.teacher-classroom-card button{grid-column:1/-1}.teacher-panel{padding:1rem}
   .teacher-student-classrooms{grid-template-columns:1fr}.teacher-student-classroom{grid-template-columns:44px 1fr}.teacher-student-classroom>b{grid-column:2}.teacher-roster-item{grid-template-columns:38px 1fr}.teacher-progress,.teacher-roster-date{grid-column:2}
   .teacher-options-grid{grid-template-columns:1fr}.teacher-question-card{grid-template-columns:32px 1fr}
+  .teacher-quiz-result-card{grid-template-columns:1fr auto}.teacher-quiz-result-card>div:nth-child(2),.teacher-quiz-result-card time{grid-column:1/-1}
 }

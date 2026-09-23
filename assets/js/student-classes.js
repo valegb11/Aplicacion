@@ -6,6 +6,7 @@
   const quizStatus = document.getElementById('student-quiz-status');
   let classroomId = null;
   let revision = 0;
+  let currentQuestions = [];
 
   async function refresh() {
     if (!classroomId) return;
@@ -33,7 +34,13 @@
         content.style.overflowWrap = 'anywhere';
         content.style.marginTop = '1rem';
         content.textContent = module.description || 'Esta clase todavía no tiene contenido.';
-        details.append(title, content);
+        const completeButton = document.createElement('button');
+        const completed = window.chemquestIsTeacherClassComplete?.(module.id);
+        completeButton.type = 'button'; completeButton.className = 'teacher-primary-btn student-complete-class';
+        completeButton.dataset.moduleId = module.id;
+        completeButton.textContent = completed ? '✓ Clase completada' : 'Marcar clase como completada · +30 XP';
+        completeButton.disabled = Boolean(completed);
+        details.append(title, content, completeButton);
         list.append(details);
       }
       status.textContent = list.childElementCount ? 'Selecciona una clase para leerla.' : 'Tu docente aún no ha compartido clases con este salón.';
@@ -43,11 +50,12 @@
       let questions = [];
       if (quizIds.length) {
         const questionResult = await window.chemquestSupabase.from('quiz_questions')
-          .select('quiz_id, prompt, image_url, option_a, option_b, option_c, option_d, position')
+          .select('id, quiz_id, prompt, image_url, option_a, option_b, option_c, option_d, position')
           .in('quiz_id', quizIds).order('position', { ascending: true });
         if (questionResult.error) throw questionResult.error;
         questions = questionResult.data || [];
       }
+      currentQuestions = questions;
       quizList.replaceChildren();
       for (const quiz of quizzes) {
         const details = document.createElement('details');
@@ -67,13 +75,18 @@
             image.className = 'teacher-question-image'; image.src = question.image_url; image.alt = `Imagen de la pregunta ${index + 1}`;
             card.append(image);
           }
-          const options = document.createElement('ol'); options.type = 'A';
-          for (const value of [question.option_a, question.option_b, question.option_c, question.option_d]) {
-            const option = document.createElement('li'); option.textContent = value; options.append(option);
+          const options = document.createElement('div'); options.className = 'student-quiz-options';
+          for (const [optionIndex, value] of [question.option_a, question.option_b, question.option_c, question.option_d].entries()) {
+            const label = document.createElement('label');
+            const input = document.createElement('input'); input.type = 'radio'; input.name = `quiz-${quiz.id}-question-${question.id}`; input.value = String(optionIndex);
+            label.append(input, document.createTextNode(` ${String.fromCharCode(65 + optionIndex)}. ${value}`)); options.append(label);
           }
           card.append(options); details.append(card);
         }
-        if (!quizQuestions.length) details.append(document.createTextNode('Este quiz todavía no tiene preguntas.'));
+        if (quizQuestions.length) {
+          const submit = document.createElement('button'); submit.type = 'button'; submit.className = 'teacher-primary-btn student-submit-quiz'; submit.dataset.quizId = quiz.id; submit.textContent = 'Entregar quiz'; details.append(submit);
+          const result = document.createElement('p'); result.className = 'student-quiz-result'; result.dataset.quizResult = quiz.id; details.append(result);
+        } else details.append(document.createTextNode('Este quiz todavía no tiene preguntas.'));
         quizList.append(details);
       }
       quizStatus.textContent = quizList.childElementCount ? 'Selecciona un quiz para ver sus preguntas.' : 'Tu docente aún no ha publicado quizzes para este salón.';
@@ -88,5 +101,32 @@
     load(id) { classroomId = id; section.hidden = false; list.replaceChildren(); refresh(); },
     reset() { classroomId = null; revision++; section.hidden = true; list.replaceChildren(); quizList.replaceChildren(); status.textContent = ''; quizStatus.textContent = ''; }
   };
+  list.addEventListener('click', event => {
+    const button = event.target.closest('[data-module-id]');
+    if (!button || button.disabled) return;
+    if (window.chemquestCompleteTeacherClass?.(button.dataset.moduleId)) {
+      button.textContent = '✓ Clase completada'; button.disabled = true;
+      status.textContent = 'Clase completada. Ganaste 30 XP.';
+    }
+  });
+  quizList.addEventListener('click', async event => {
+    const button = event.target.closest('[data-quiz-id]');
+    if (!button) return;
+    const quizId = button.dataset.quizId;
+    const quizQuestions = currentQuestions.filter(question => question.quiz_id === quizId);
+    const answers = quizQuestions.map(question => {
+      const selected = quizList.querySelector(`input[name="quiz-${quizId}-question-${question.id}"]:checked`);
+      return selected ? Number(selected.value) : null;
+    });
+    const resultNode = quizList.querySelector(`[data-quiz-result="${quizId}"]`);
+    if (answers.some(answer => answer === null)) { resultNode.textContent = 'Responde todas las preguntas antes de entregar.'; return; }
+    button.disabled = true; resultNode.textContent = 'Calificando…';
+    const { data, error } = await window.chemquestSupabase.rpc('submit_teacher_quiz', { requested_quiz: quizId, submitted_answers: answers });
+    if (error) { resultNode.textContent = `No pudimos guardar tu resultado: ${error.message}`; button.disabled = false; return; }
+    const outcome = data || {};
+    window.chemquestAwardTeacherQuizXP?.(outcome.awarded_xp);
+    resultNode.textContent = `Resultado: ${outcome.score}/${outcome.total}. ${outcome.awarded_xp ? `Ganaste ${outcome.awarded_xp} XP.` : 'Ya habías obtenido este puntaje o uno mejor.'}`;
+    button.textContent = 'Volver a entregar'; button.disabled = false;
+  });
   document.getElementById('refresh-student-classes').addEventListener('click', refresh);
 })();

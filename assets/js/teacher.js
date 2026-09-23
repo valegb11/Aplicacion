@@ -7,6 +7,8 @@
   const rosterList = $('teacher-roster-list');
   const studentClassrooms = $('teacher-student-classrooms');
   const studentGradeFilter = $('student-grade-filter');
+  const quizResultsList = $('teacher-quiz-results');
+  const quizResultsEmpty = $('teacher-quiz-results-empty');
   const viewTitles = { overview: 'Resumen', classrooms: 'Mis salones', 'create-classroom': 'Crear salón', students: 'Estudiantes y avances', classes: 'Clases', quizzes: 'Cuestionarios' };
   let currentSession = null;
   let classrooms = [];
@@ -138,6 +140,31 @@
     renderQuizDrafts();
   }
 
+  async function loadQuizResults() {
+    $('refresh-quiz-results-btn').disabled = true;
+    const quizIds = quizDrafts.map(quiz => quiz.id);
+    if (!quizIds.length) { quizResultsList.innerHTML = ''; quizResultsEmpty.hidden = false; $('refresh-quiz-results-btn').disabled = false; return; }
+    const { data: attempts = [], error } = await window.chemquestSupabase.from('quiz_attempts')
+      .select('quiz_id, student_id, score, total_questions, xp_earned, attempted_at').in('quiz_id', quizIds).order('attempted_at', { ascending: false });
+    if (error) { setStatus(`No se pudieron cargar las notas: ${error.message}`, 'error'); $('refresh-quiz-results-btn').disabled = false; return; }
+    const studentIds = [...new Set(attempts.map(attempt => attempt.student_id))];
+    let profiles = [];
+    if (studentIds.length) {
+      const result = await window.chemquestSupabase.from('profiles').select('id, full_name, email').in('id', studentIds);
+      if (!result.error) profiles = result.data || [];
+    }
+    const profileById = Object.fromEntries(profiles.map(profile => [profile.id, profile]));
+    const quizById = Object.fromEntries(quizDrafts.map(quiz => [quiz.id, quiz]));
+    quizResultsEmpty.hidden = attempts.length > 0;
+    quizResultsList.innerHTML = attempts.map(attempt => {
+      const profile = profileById[attempt.student_id] || {};
+      const quiz = quizById[attempt.quiz_id] || {};
+      const percent = attempt.total_questions ? Math.round((attempt.score / attempt.total_questions) * 100) : 0;
+      return `<article class="teacher-quiz-result-card"><div><strong>${escapeHtml(profile.full_name || profile.email || 'Estudiante')}</strong><small>${escapeHtml(profile.email || '')}</small></div><div><strong>${escapeHtml(quiz.title || 'Quiz')}</strong><small>Grado ${quiz.grade || '—'}</small></div><div class="teacher-quiz-grade"><b>${attempt.score}/${attempt.total_questions}</b><span>${percent}% · ${attempt.xp_earned} XP</span></div><time>${escapeHtml(formatDate(attempt.attempted_at))}</time></article>`;
+    }).join('');
+    $('refresh-quiz-results-btn').disabled = false;
+  }
+
   async function createClassroom(event) {
     event.preventDefault();
     const cleanName = $('classroom-name').value.trim().replace(/\s+/g, ' '); const selectedGrade = Number($('classroom-grade').value);
@@ -244,12 +271,14 @@
       const result = await window.chemquestSupabase.from('student_progress').select('student_id, total_xp, level, completed_days, updated_at').in('student_id', ids);
       if (!result.error) progressRows = result.data || [];
     }
+    const moduleResult = await window.chemquestSupabase.from('classroom_modules').select('module_id').eq('classroom_id', classroomId);
+    const assignedModuleIds = (moduleResult.data || []).map(item => `module:${item.module_id}`);
     const byId = Object.fromEntries(profiles.map(profile => [profile.id, profile]));
     const progressById = Object.fromEntries(progressRows.map(progress => [progress.student_id, progress]));
     $('teacher-roster-empty').hidden = memberships.length > 0;
-    rosterList.innerHTML = memberships.map(membership => { const profile = byId[membership.student_id] || {}; const progress = progressById[membership.student_id] || {}; const displayName = profile.full_name || profile.email || 'Estudiante'; const completed = (progress.completed_days || []).filter(day => String(day).startsWith(`d${selectedClassroom.grade}-`)).length; const percent = Math.round((completed / 6) * 100); return `<article class="teacher-roster-item">
+    rosterList.innerHTML = memberships.map(membership => { const profile = byId[membership.student_id] || {}; const progress = progressById[membership.student_id] || {}; const displayName = profile.full_name || profile.email || 'Estudiante'; const completedDays = progress.completed_days || []; const builtInCompleted = completedDays.filter(day => String(day).startsWith(`d${selectedClassroom.grade}-`)).length; const teacherCompleted = assignedModuleIds.filter(id => completedDays.includes(id)).length; const completed = builtInCompleted + teacherCompleted; const totalClasses = 6 + assignedModuleIds.length; const percent = Math.round((completed / totalClasses) * 100); return `<article class="teacher-roster-item">
       <div class="teacher-avatar">${escapeHtml(displayName.charAt(0).toUpperCase() || 'E')}</div><div class="teacher-student-identity"><strong>${escapeHtml(displayName)}</strong><small>${escapeHtml(profile.email || '')}</small></div>
-      <div class="teacher-progress"><div><span>Avance general</span><b>${percent}%</b></div><div class="teacher-progress-track"><i style="width:${percent}%"></i></div><small>${completed} de 6 clases · ${progress.total_xp || 0} XP · Nivel ${progress.level || 1}</small></div><div class="teacher-roster-date">${progress.updated_at ? `Actividad ${escapeHtml(formatDate(progress.updated_at))}` : `Desde ${escapeHtml(formatDate(membership.joined_at))}`}</div>
+      <div class="teacher-progress"><div><span>Avance general</span><b>${percent}%</b></div><div class="teacher-progress-track"><i style="width:${percent}%"></i></div><small>${completed} de ${totalClasses} clases · ${progress.total_xp || 0} XP · Nivel ${progress.level || 1}</small></div><div class="teacher-roster-date">${progress.updated_at ? `Actividad ${escapeHtml(formatDate(progress.updated_at))}` : `Desde ${escapeHtml(formatDate(membership.joined_at))}`}</div>
     </article>`; }).join(''); setStatus('');
   }
 
@@ -268,10 +297,10 @@
     $('teacher-grade').textContent = gradeText; $('teacher-header-grades').textContent = gradeText;
     const options = assignedGrades.map(value => `<option value="${value}">${value}.º</option>`).join('') || '<option value="">Sin grados asignados</option>';
     $('classroom-grade').innerHTML = options; $('class-grade').innerHTML = options; $('quiz-grade').innerHTML = options; studentGradeFilter.innerHTML = '<option value="all">Todos</option>' + options;
-    $('create-classroom-btn').disabled = assignedGrades.length === 0; showView('overview'); await Promise.all([loadClassrooms(), loadModules(), loadQuizzes()]);
+    $('create-classroom-btn').disabled = assignedGrades.length === 0; showView('overview'); await Promise.all([loadClassrooms(), loadModules(), loadQuizzes()]); await loadQuizResults();
   }
 
-  function reset() { currentSession = null; classrooms = []; selectedClassroom = null; assignedGrades = []; studyModules = []; quizDrafts = []; selectedQuiz = null; quizQuestions = []; classroomList.innerHTML = ''; rosterList.innerHTML = ''; rosterPanel.hidden = true; $('teacher-quiz-editor').hidden = true; clearPastedQuestionImage(); }
+  function reset() { currentSession = null; classrooms = []; selectedClassroom = null; assignedGrades = []; studyModules = []; quizDrafts = []; selectedQuiz = null; quizQuestions = []; classroomList.innerHTML = ''; rosterList.innerHTML = ''; quizResultsList.innerHTML = ''; quizResultsEmpty.hidden = false; rosterPanel.hidden = true; $('teacher-quiz-editor').hidden = true; clearPastedQuestionImage(); }
 
   document.querySelectorAll('[data-teacher-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.teacherView)));
   document.querySelectorAll('[data-go-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.goView)));
@@ -282,6 +311,7 @@
   $('quiz-image-paste-zone').addEventListener('click', () => $('quiz-image-paste-zone').focus());
   $('remove-quiz-image-btn').addEventListener('click', clearPastedQuestionImage);
   $('refresh-classrooms-btn').addEventListener('click', loadClassrooms); $('copy-classroom-code-btn').addEventListener('click', copyClassroomCode); studentGradeFilter.addEventListener('change', renderStudentClassrooms);
+  $('refresh-quiz-results-btn').addEventListener('click', loadQuizResults);
   classroomList.addEventListener('click', event => { const target = event.target.closest('[data-classroom-id]'); if (target) openClassroom(target.dataset.classroomId); });
   studentClassrooms.addEventListener('click', event => { const target = event.target.closest('[data-student-classroom-id]'); if (target) openClassroom(target.dataset.studentClassroomId); });
   $('teacher-quiz-list').addEventListener('click', event => {
