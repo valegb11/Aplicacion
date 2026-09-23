@@ -42,5 +42,8 @@ preguntas. También vincula el contenido que existía antes de ejecutar el archi
 `04_quiz_attempts.sql` guarda la mejor nota de cada estudiante en los quizzes
 del docente y calcula de forma segura la experiencia obtenida.
 
+`05_student_progress_rpc.sql` guarda la EXP y las clases completadas mediante
+una función segura asociada al estudiante que tiene la sesión iniciada.
+
 Ejecuta los archivos en orden y solo después de revisar cada paso. Nunca pegues
 aquí contraseñas, claves `secret` o `service_role`.

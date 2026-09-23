@@ -924,13 +924,12 @@ window.chemquestAwardTeacherQuizXP = function(xp){
 async function syncCloudProgress(){
   if(!window.chemquestSupabase || !window.chemquestCurrentStudentId) return;
   clearTimeout(cloudSyncTimer);
-  const { error } = await window.chemquestSupabase.from('student_progress').upsert({
-    student_id: window.chemquestCurrentStudentId,
-    total_xp: state.totalXP,
-    level: state.level,
-    completed_days: state.completedDays,
-    day_results: state.dayResults
-  }, { onConflict: 'student_id' });
+  const { error } = await window.chemquestSupabase.rpc('save_student_progress', {
+    requested_total_xp: state.totalXP,
+    requested_level: state.level,
+    requested_completed_days: state.completedDays,
+    requested_day_results: state.dayResults
+  });
   if(error) console.warn('No se pudo sincronizar el avance:', error.message);
 }
 
