@@ -940,6 +940,8 @@ function scheduleCloudProgressSync(){
 }
 
 window.chemquestFlushCloudProgress = syncCloudProgress;
+window.addEventListener('online', syncCloudProgress);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncCloudProgress(); });
 
 window.chemquestLoadCloudProgress = async function(studentId){
   window.chemquestCurrentStudentId = studentId;

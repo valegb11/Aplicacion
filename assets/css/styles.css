@@ -904,6 +904,7 @@ body{
 .teacher-secondary-btn{border:1px solid var(--border2);background:var(--card2);color:var(--dim)}
 .teacher-primary-btn:disabled,.teacher-secondary-btn:disabled{opacity:.55;cursor:wait}
 .teacher-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.teacher-heading-actions{display:flex;gap:.55rem;flex-wrap:wrap;justify-content:flex-end}
 .teacher-empty{padding:1.25rem;border:1px dashed var(--border2);border-radius:14px;color:var(--muted);text-align:center;font-size:.82rem}
 .teacher-classroom-list,.teacher-roster-list{display:grid;gap:.7rem}
 .teacher-classroom-card{

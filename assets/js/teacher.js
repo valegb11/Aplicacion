@@ -19,6 +19,8 @@
   let selectedQuiz = null;
   let quizQuestions = [];
   let pastedQuestionImage = null;
+  let activeView = 'overview';
+  let rosterRefreshTimer = null;
 
   const escapeHtml = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
   const formatDate = value => value ? new Intl.DateTimeFormat('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value)) : '';
@@ -67,6 +69,7 @@
   }
 
   function showView(view) {
+    activeView = view;
     document.querySelectorAll('[data-view-panel]').forEach(panel => { const active = panel.dataset.viewPanel === view; panel.hidden = !active; panel.classList.toggle('active', active); });
     document.querySelectorAll('[data-teacher-view]').forEach(button => button.classList.toggle('active', button.dataset.teacherView === view));
     $('teacher-view-title').textContent = viewTitles[view] || 'Panel docente';
@@ -264,10 +267,10 @@
     selectedQuiz = null; quizQuestions = []; $('teacher-quiz-editor').hidden = true; $('quiz-question-form').reset(); clearPastedQuestionImage();
   }
 
-  async function openClassroom(classroomId) {
+  async function openClassroom(classroomId, silent = false) {
     selectedClassroom = classrooms.find(item => item.id === classroomId); if (!selectedClassroom) return;
-    showView('students'); rosterPanel.hidden = false; $('roster-classroom-name').textContent = `${selectedClassroom.name} · Código ${selectedClassroom.join_code}`;
-    $('teacher-roster-empty').hidden = true; rosterList.innerHTML = ''; setStatus('Cargando estudiantes…');
+    if (!silent) showView('students'); rosterPanel.hidden = false; $('roster-classroom-name').textContent = `${selectedClassroom.name} · Código ${selectedClassroom.join_code}`;
+    if (!silent) { $('teacher-roster-empty').hidden = true; rosterList.innerHTML = ''; setStatus('Cargando estudiantes…'); }
     const { data: memberships = [], error } = await window.chemquestSupabase.from('classroom_members').select('student_id, joined_at').eq('classroom_id', classroomId).order('joined_at', { ascending: true });
     if (error) { setStatus(`No se pudieron cargar los estudiantes: ${error.message}`, 'error'); return; }
     const ids = memberships.map(item => item.student_id); let profiles = [];
@@ -286,6 +289,8 @@
       <div class="teacher-avatar">${escapeHtml(displayName.charAt(0).toUpperCase() || 'E')}</div><div class="teacher-student-identity"><strong>${escapeHtml(displayName)}</strong><small>${escapeHtml(profile.email || '')}</small></div>
       <div class="teacher-progress"><div><span>Avance general</span><b>${percent}%</b></div><div class="teacher-progress-track"><i style="width:${percent}%"></i></div><small>${completed} de ${totalClasses} clases · ${progress.total_xp || 0} EXP · Nivel ${progress.level || 1}</small></div><div class="teacher-roster-date">${progress.updated_at ? `Actividad ${escapeHtml(formatDate(progress.updated_at))}` : `Desde ${escapeHtml(formatDate(membership.joined_at))}`}</div>
     </article>`; }).join(''); setStatus('');
+    clearTimeout(rosterRefreshTimer);
+    rosterRefreshTimer = setTimeout(() => { if (activeView === 'students' && selectedClassroom?.id === classroomId) openClassroom(classroomId, true); }, 5000);
   }
 
   async function copyClassroomCode() {
@@ -306,7 +311,7 @@
     $('create-classroom-btn').disabled = assignedGrades.length === 0; showView('overview'); await Promise.all([loadClassrooms(), loadModules(), loadQuizzes()]); await loadQuizResults();
   }
 
-  function reset() { currentSession = null; classrooms = []; selectedClassroom = null; assignedGrades = []; studyModules = []; quizDrafts = []; selectedQuiz = null; quizQuestions = []; classroomList.innerHTML = ''; rosterList.innerHTML = ''; quizResultsList.innerHTML = ''; quizResultsEmpty.hidden = false; rosterPanel.hidden = true; $('teacher-quiz-editor').hidden = true; clearPastedQuestionImage(); }
+  function reset() { clearTimeout(rosterRefreshTimer); currentSession = null; classrooms = []; selectedClassroom = null; assignedGrades = []; studyModules = []; quizDrafts = []; selectedQuiz = null; quizQuestions = []; classroomList.innerHTML = ''; rosterList.innerHTML = ''; quizResultsList.innerHTML = ''; quizResultsEmpty.hidden = false; rosterPanel.hidden = true; $('teacher-quiz-editor').hidden = true; clearPastedQuestionImage(); }
 
   document.querySelectorAll('[data-teacher-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.teacherView)));
   document.querySelectorAll('[data-go-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.goView)));
@@ -317,6 +322,7 @@
   $('quiz-image-paste-zone').addEventListener('click', () => $('quiz-image-paste-zone').focus());
   $('remove-quiz-image-btn').addEventListener('click', clearPastedQuestionImage);
   $('refresh-classrooms-btn').addEventListener('click', loadClassrooms); $('copy-classroom-code-btn').addEventListener('click', copyClassroomCode); studentGradeFilter.addEventListener('change', renderStudentClassrooms);
+  $('refresh-roster-btn').addEventListener('click', () => { if (selectedClassroom) openClassroom(selectedClassroom.id, true); });
   $('refresh-quiz-results-btn').addEventListener('click', loadQuizResults);
   classroomList.addEventListener('click', event => { const target = event.target.closest('[data-classroom-id]'); if (target) openClassroom(target.dataset.classroomId); });
   studentClassrooms.addEventListener('click', event => { const target = event.target.closest('[data-student-classroom-id]'); if (target) openClassroom(target.dataset.studentClassroomId); });

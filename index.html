@@ -170,7 +170,10 @@
           <h2 id="roster-title">Integrantes del salón</h2>
           <p id="roster-classroom-name"></p>
         </div>
-        <button class="teacher-secondary-btn" id="copy-classroom-code-btn" type="button">Copiar código</button>
+        <div class="teacher-heading-actions">
+          <button class="teacher-secondary-btn" id="refresh-roster-btn" type="button">Actualizar avances</button>
+          <button class="teacher-secondary-btn" id="copy-classroom-code-btn" type="button">Copiar código</button>
+        </div>
       </div>
       <div class="teacher-empty" id="teacher-roster-empty">Ningún estudiante ha ingresado este código todavía.</div>
       <div class="teacher-roster-list" id="teacher-roster-list"></div>
@@ -420,8 +423,8 @@
 <!-- Librería que permite que ChemQuest se comunique con Supabase. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="assets/js/supabase-client.js"></script>
-<script src="assets/js/teacher.js?v=4"></script>
-<script src="assets/js/app.js?v=5"></script>
+<script src="assets/js/teacher.js?v=5"></script>
+<script src="assets/js/app.js?v=6"></script>
 <script src="assets/js/student-classes.js?v=5"></script>
 <script src="assets/js/auth.js?v=8"></script>
 </body>
