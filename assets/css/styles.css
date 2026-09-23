@@ -1054,3 +1054,30 @@ body{
   .teacher-options-grid{grid-template-columns:1fr}.teacher-question-card{grid-template-columns:32px 1fr}
   .teacher-quiz-result-card{grid-template-columns:1fr auto}.teacher-quiz-result-card>div:nth-child(2),.teacher-quiz-result-card time{grid-column:1/-1}
 }
+
+/* Clases y quizzes del docente en pantallas de actividad */
+.student-quiz-launch>span:first-child{background:rgba(167,139,250,.12)}
+.student-quiz-launch>span:last-child{color:var(--purple)}
+.teacher-quiz-progress{background:linear-gradient(90deg,var(--purple),var(--cyan))}
+.teacher-quiz-question{font:700 clamp(1rem,3vw,1.35rem) var(--font-game);line-height:1.45;margin-bottom:1.25rem}
+.teacher-quiz-screen-options{display:grid;gap:.7rem}
+.teacher-quiz-screen-options button{padding:1rem;border:1px solid var(--border);border-radius:14px;background:var(--bg2);color:var(--dim);font:inherit;font-weight:800;text-align:left;cursor:pointer;transition:.2s}
+.teacher-quiz-screen-options button:hover{border-color:var(--purple);color:var(--text);transform:translateX(3px)}
+.teacher-quiz-screen-options button.selected{border-color:var(--purple);background:rgba(167,139,250,.1);color:var(--text)}
+.teacher-quiz-screen-image{display:block;width:min(100%,560px);max-height:310px;object-fit:contain;margin:0 auto 1.25rem;border-radius:15px;background:#fff}
+.teacher-quiz-screen-result{text-align:center}.teacher-quiz-screen-result strong{display:block;color:var(--cyan);font:700 clamp(1.5rem,5vw,2.4rem) var(--font-game);margin:1rem 0}.teacher-quiz-screen-result p{color:var(--dim);line-height:1.6}
+
+@media(max-width:640px){
+  .lesson-topbar,.quiz-topbar{padding:.65rem .75rem;gap:.55rem}
+  .back-btn{padding:.45rem .6rem;font-size:.74rem}
+  .teacher-lesson-xp{padding:.4rem .5rem;font-size:.62rem}
+  .lesson-progress-label{font-size:.48rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lesson-content,.quiz-body{padding:1rem}
+  .slide-card,.question-card{padding:1.1rem;border-radius:18px}
+  .slide-title{font-size:1.08rem}.teacher-lesson-visual{min-height:145px}.teacher-lesson-visual-icon{font-size:3.5rem}
+  .teacher-lesson-actions{flex-direction:column-reverse}
+  .student-class-launch{grid-template-columns:40px minmax(0,1fr);padding:.8rem}
+  .student-class-launch>span:first-child{width:40px;height:40px}.student-class-launch>span:last-child{grid-column:2}
+  .student-content-grid{grid-template-columns:1fr}.student-content-column{padding:1rem}
+  .teacher-quiz-screen-options button{padding:.85rem}.teacher-quiz-topbar .teacher-lesson-xp{display:none}
+}

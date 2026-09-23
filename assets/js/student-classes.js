@@ -12,11 +12,21 @@
   let lessonSlides = [];
   let lessonSlide = 0;
   let lessonCheckAnswered = false;
+  let currentQuizzes = [];
+  let activeQuiz = null;
+  let activeQuizQuestions = [];
+  let activeQuestion = 0;
+  let activeAnswers = [];
 
   const lessonScreen = document.getElementById('screen-teacher-lesson');
   const lessonContent = document.getElementById('teacher-lesson-content');
   const lessonLabel = document.getElementById('teacher-lesson-label');
   const lessonProgress = document.getElementById('teacher-lesson-progress');
+  const teacherQuizScreen = document.getElementById('screen-teacher-quiz');
+  const teacherQuizContent = document.getElementById('teacher-quiz-content');
+  const teacherQuizLabel = document.getElementById('teacher-quiz-label');
+  const teacherQuizCounter = document.getElementById('teacher-quiz-counter');
+  const teacherQuizProgress = document.getElementById('teacher-quiz-progress');
 
   function makeSlides(module) {
     const source = (module.description || 'Esta clase todavía no tiene contenido.').trim();
@@ -98,6 +108,50 @@
     lessonScreen.classList.add('active'); window.scrollTo({ top: 0 }); renderTeacherLesson();
   }
 
+  function renderTeacherQuiz() {
+    const question = activeQuizQuestions[activeQuestion];
+    teacherQuizLabel.textContent = activeQuiz.title.toUpperCase();
+    teacherQuizCounter.textContent = `${activeQuestion + 1} / ${activeQuizQuestions.length}`;
+    teacherQuizProgress.style.width = `${((activeQuestion + 1) / activeQuizQuestions.length) * 100}%`;
+    teacherQuizContent.replaceChildren();
+    const title = document.createElement('h1'); title.className = 'teacher-quiz-question'; title.textContent = question.prompt;
+    teacherQuizContent.append(title);
+    if (question.image_url) { const image = document.createElement('img'); image.className = 'teacher-quiz-screen-image'; image.src = question.image_url; image.alt = `Imagen de la pregunta ${activeQuestion + 1}`; teacherQuizContent.append(image); }
+    const options = document.createElement('div'); options.className = 'teacher-quiz-screen-options';
+    [question.option_a, question.option_b, question.option_c, question.option_d].forEach((value, optionIndex) => {
+      const option = document.createElement('button'); option.type = 'button'; option.textContent = `${String.fromCharCode(65 + optionIndex)}. ${value}`;
+      if (activeAnswers[activeQuestion] === optionIndex) option.classList.add('selected');
+      option.addEventListener('click', () => { activeAnswers[activeQuestion] = optionIndex; options.querySelectorAll('button').forEach(button => button.classList.remove('selected')); option.classList.add('selected'); next.disabled = false; }); options.append(option);
+    });
+    const actions = document.createElement('div'); actions.className = 'teacher-lesson-actions';
+    const previous = document.createElement('button'); previous.type = 'button'; previous.className = 'teacher-secondary-btn'; previous.textContent = '← Anterior'; previous.disabled = activeQuestion === 0; previous.addEventListener('click', () => { activeQuestion--; renderTeacherQuiz(); });
+    const next = document.createElement('button'); next.type = 'button'; next.className = 'teacher-primary-btn'; next.textContent = activeQuestion === activeQuizQuestions.length - 1 ? 'Entregar quiz' : 'Siguiente →'; next.disabled = activeAnswers[activeQuestion] === undefined;
+    next.addEventListener('click', async () => { if (activeQuestion < activeQuizQuestions.length - 1) { activeQuestion++; renderTeacherQuiz(); return; } await submitTeacherQuiz(next); });
+    actions.append(previous, next); teacherQuizContent.append(options, actions);
+  }
+
+  async function submitTeacherQuiz(button) {
+    button.disabled = true; button.textContent = 'Calificando…';
+    const { data, error } = await window.chemquestSupabase.rpc('submit_teacher_quiz', { requested_quiz: activeQuiz.id, submitted_answers: activeAnswers });
+    teacherQuizContent.replaceChildren();
+    const result = document.createElement('div'); result.className = 'teacher-quiz-screen-result';
+    if (error) { result.innerHTML = '<strong>No pudimos guardar el resultado</strong>'; const message = document.createElement('p'); message.textContent = error.message; result.append(message); }
+    else {
+      const outcome = data || {}; window.chemquestAwardTeacherQuizXP?.(outcome.awarded_xp);
+      const heading = document.createElement('div'); heading.className = 'slide-eyebrow'; heading.textContent = 'RESULTADO DEL QUIZ';
+      const score = document.createElement('strong'); score.textContent = `${outcome.score}/${outcome.total}`;
+      const message = document.createElement('p'); message.textContent = outcome.awarded_xp ? `Ganaste ${outcome.awarded_xp} XP. Tu nota ya está disponible para el docente.` : 'Tu intento quedó guardado. Ya tenías este puntaje o uno mejor.';
+      result.append(heading, score, message);
+    }
+    const home = document.createElement('button'); home.type = 'button'; home.className = 'teacher-primary-btn'; home.style.marginTop = '1.25rem'; home.textContent = 'Volver al inicio'; home.addEventListener('click', () => { window.goHome(); refresh(); }); result.append(home); teacherQuizContent.append(result);
+  }
+
+  function openTeacherQuiz(quiz) {
+    activeQuiz = quiz; activeQuizQuestions = currentQuestions.filter(question => question.quiz_id === quiz.id); activeQuestion = 0; activeAnswers = [];
+    if (!activeQuizQuestions.length) return;
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active')); teacherQuizScreen.classList.add('active'); window.scrollTo({ top: 0 }); renderTeacherQuiz();
+  }
+
   async function refresh() {
     if (!classroomId) return;
     const request = ++revision;
@@ -126,7 +180,7 @@
       }
       status.textContent = list.childElementCount ? 'Selecciona una clase para leerla.' : 'Tu docente aún no ha compartido clases con este salón.';
       if (quizResult.error) throw quizResult.error;
-      const quizzes = (quizResult.data || []).map(row => row.teacher_quizzes).filter(quiz => quiz?.status === 'published');
+      const quizzes = (quizResult.data || []).map(row => row.teacher_quizzes).filter(quiz => quiz?.status === 'published'); currentQuizzes = quizzes;
       const quizIds = quizzes.map(quiz => quiz.id);
       let questions = [];
       if (quizIds.length) {
@@ -139,36 +193,9 @@
       currentQuestions = questions;
       quizList.replaceChildren();
       for (const quiz of quizzes) {
-        const details = document.createElement('details');
-        details.className = 'teacher-panel';
-        const title = document.createElement('summary');
-        title.textContent = quiz.title;
-        details.append(title);
         const quizQuestions = questions.filter(question => question.quiz_id === quiz.id);
-        for (const [index, question] of quizQuestions.entries()) {
-          const card = document.createElement('article');
-          card.className = 'teacher-question-card';
-          const heading = document.createElement('strong');
-          heading.textContent = `${index + 1}. ${question.prompt}`;
-          card.append(heading);
-          if (question.image_url) {
-            const image = document.createElement('img');
-            image.className = 'teacher-question-image'; image.src = question.image_url; image.alt = `Imagen de la pregunta ${index + 1}`;
-            card.append(image);
-          }
-          const options = document.createElement('div'); options.className = 'student-quiz-options';
-          for (const [optionIndex, value] of [question.option_a, question.option_b, question.option_c, question.option_d].entries()) {
-            const label = document.createElement('label');
-            const input = document.createElement('input'); input.type = 'radio'; input.name = `quiz-${quiz.id}-question-${question.id}`; input.value = String(optionIndex);
-            label.append(input, document.createTextNode(` ${String.fromCharCode(65 + optionIndex)}. ${value}`)); options.append(label);
-          }
-          card.append(options); details.append(card);
-        }
-        if (quizQuestions.length) {
-          const submit = document.createElement('button'); submit.type = 'button'; submit.className = 'teacher-primary-btn student-submit-quiz'; submit.dataset.quizId = quiz.id; submit.textContent = 'Entregar quiz'; details.append(submit);
-          const result = document.createElement('p'); result.className = 'student-quiz-result'; result.dataset.quizResult = quiz.id; details.append(result);
-        } else details.append(document.createTextNode('Este quiz todavía no tiene preguntas.'));
-        quizList.append(details);
+        const launch = document.createElement('button'); launch.type = 'button'; launch.className = 'student-class-launch student-quiz-launch'; launch.dataset.quizId = quiz.id; launch.disabled = !quizQuestions.length;
+        const icon = document.createElement('span'); icon.textContent = '⚡'; const info = document.createElement('span'); const title = document.createElement('strong'); title.textContent = quiz.title; const meta = document.createElement('small'); meta.textContent = quizQuestions.length ? `${quizQuestions.length} preguntas · Resultado para tu docente` : 'Este quiz todavía no tiene preguntas'; info.append(title, meta); const arrow = document.createElement('span'); arrow.textContent = quizQuestions.length ? 'Comenzar →' : 'No disponible'; launch.append(icon, info, arrow); quizList.append(launch);
       }
       quizStatus.textContent = quizList.childElementCount ? 'Selecciona un quiz para ver sus preguntas.' : 'Tu docente aún no ha publicado quizzes para este salón.';
     } catch (_error) {
@@ -180,7 +207,7 @@
   }
   window.chemquestStudentClasses = {
     load(id) { classroomId = id; section.hidden = false; list.replaceChildren(); refresh(); },
-    reset() { classroomId = null; revision++; currentModules = []; activeModule = null; section.hidden = true; list.replaceChildren(); quizList.replaceChildren(); status.textContent = ''; quizStatus.textContent = ''; }
+    reset() { classroomId = null; revision++; currentModules = []; currentQuizzes = []; activeModule = null; activeQuiz = null; section.hidden = true; list.replaceChildren(); quizList.replaceChildren(); status.textContent = ''; quizStatus.textContent = ''; }
   };
   list.addEventListener('click', event => {
     const button = event.target.closest('[data-module-id]');
@@ -188,24 +215,10 @@
     const module = currentModules.find(item => item.id === button.dataset.moduleId); if (module) openTeacherLesson(module);
   });
   document.getElementById('teacher-lesson-back').addEventListener('click', () => { window.goHome(); refresh(); });
-  quizList.addEventListener('click', async event => {
+  document.getElementById('teacher-quiz-back').addEventListener('click', () => { window.goHome(); refresh(); });
+  quizList.addEventListener('click', event => {
     const button = event.target.closest('[data-quiz-id]');
-    if (!button) return;
-    const quizId = button.dataset.quizId;
-    const quizQuestions = currentQuestions.filter(question => question.quiz_id === quizId);
-    const answers = quizQuestions.map(question => {
-      const selected = quizList.querySelector(`input[name="quiz-${quizId}-question-${question.id}"]:checked`);
-      return selected ? Number(selected.value) : null;
-    });
-    const resultNode = quizList.querySelector(`[data-quiz-result="${quizId}"]`);
-    if (answers.some(answer => answer === null)) { resultNode.textContent = 'Responde todas las preguntas antes de entregar.'; return; }
-    button.disabled = true; resultNode.textContent = 'Calificando…';
-    const { data, error } = await window.chemquestSupabase.rpc('submit_teacher_quiz', { requested_quiz: quizId, submitted_answers: answers });
-    if (error) { resultNode.textContent = `No pudimos guardar tu resultado: ${error.message}`; button.disabled = false; return; }
-    const outcome = data || {};
-    window.chemquestAwardTeacherQuizXP?.(outcome.awarded_xp);
-    resultNode.textContent = `Resultado: ${outcome.score}/${outcome.total}. ${outcome.awarded_xp ? `Ganaste ${outcome.awarded_xp} XP.` : 'Ya habías obtenido este puntaje o uno mejor.'}`;
-    button.textContent = 'Volver a entregar'; button.disabled = false;
+    if (!button || button.disabled) return; const quiz = currentQuizzes.find(item => item.id === button.dataset.quizId); if (quiz) openTeacherQuiz(quiz);
   });
   document.getElementById('refresh-student-classes').addEventListener('click', refresh);
 })();
