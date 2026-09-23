@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ChemQuest — Química Inorgánica</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css?v=3">
+<link rel="stylesheet" href="assets/css/styles.css?v=4">
 </head>
 <body>
 
@@ -288,12 +288,18 @@
     <section id="student-classes" hidden aria-labelledby="student-classes-heading">
       <h2 class="map-title" id="student-classes-heading">📚 Contenido de tu docente</h2>
       <button class="teacher-secondary-btn" id="refresh-student-classes" type="button">Actualizar contenido</button>
-      <h3>Clases</h3>
-      <p id="student-class-status" role="status"></p>
-      <div id="student-class-list"></div>
-      <h3>Quizzes</h3>
-      <p id="student-quiz-status" role="status"></p>
-      <div id="student-quiz-list"></div>
+      <div class="student-content-grid">
+        <div class="student-content-column student-content-classes">
+          <h3><span aria-hidden="true">⚗️</span> Clases</h3>
+          <p id="student-class-status" role="status"></p>
+          <div id="student-class-list"></div>
+        </div>
+        <div class="student-content-column student-content-quizzes">
+          <h3><span aria-hidden="true">⚡</span> Quizzes</h3>
+          <p id="student-quiz-status" role="status"></p>
+          <div id="student-quiz-list"></div>
+        </div>
+      </div>
     </section>
 
     <!-- Days Map -->

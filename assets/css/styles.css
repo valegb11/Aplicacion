@@ -992,6 +992,26 @@ body{
 .teacher-form-panel{width:min(100%,720px)}
 .teacher-panel textarea{width:100%;padding:.8rem .9rem;border:1px solid var(--border2);border-radius:12px;background:var(--bg2);color:var(--text);font:inherit;resize:vertical;outline:none}
 .teacher-panel textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+
+/* Contenido asignado al estudiante: dos columnas en escritorio. */
+.student-content-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.25rem;align-items:start;margin-top:1rem}
+.student-content-column{position:relative;min-width:0;padding:1.15rem;border:1px solid var(--border);border-radius:18px;background:rgba(15,23,42,.72);overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+.student-content-column::after{content:"";position:absolute;width:150px;height:150px;right:-65px;top:-75px;border-radius:50%;filter:blur(2px);opacity:.13;pointer-events:none}
+.student-content-column:hover{transform:translateY(-3px)}
+.student-content-column h3{position:relative;z-index:1;display:flex;align-items:center;gap:.55rem;margin:0 0 .35rem;font-family:var(--font-game);font-size:.9rem;color:var(--text)}
+.student-content-column h3 span{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;font:normal 1.05rem var(--font-body)}
+.student-content-classes{border-color:rgba(34,211,238,.28)}
+.student-content-classes::after{background:var(--cyan)}
+.student-content-classes:hover{border-color:rgba(34,211,238,.6);box-shadow:0 14px 35px rgba(34,211,238,.08)}
+.student-content-classes h3 span{background:rgba(34,211,238,.12);box-shadow:inset 0 0 0 1px rgba(34,211,238,.18)}
+.student-content-quizzes{border-color:rgba(167,139,250,.28)}
+.student-content-quizzes::after{background:var(--purple)}
+.student-content-quizzes:hover{border-color:rgba(167,139,250,.6);box-shadow:0 14px 35px rgba(167,139,250,.08)}
+.student-content-quizzes h3 span{background:rgba(167,139,250,.13);box-shadow:inset 0 0 0 1px rgba(167,139,250,.2)}
+.student-content-column>p{min-height:2.6em;margin:0 0 .8rem;color:var(--muted);line-height:1.45}
+.student-content-column .teacher-panel{position:relative;z-index:1;margin-top:.65rem;transition:transform .18s,border-color .18s,background .18s}
+.student-content-column .teacher-panel:hover{transform:translateX(4px);border-color:var(--cyan);background:rgba(20,31,51,.98)}
+.student-content-quizzes .teacher-panel:hover{border-color:var(--purple)}
 .teacher-classroom-list{grid-template-columns:repeat(auto-fit,minmax(310px,1fr));margin-top:1rem}
 .teacher-classroom-card{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:.85rem;text-align:left;cursor:default}
 .teacher-classroom-card:hover{transform:none}.teacher-classroom-icon{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;background:rgba(34,211,238,.1);color:var(--cyan);font-size:1.3rem}
@@ -1018,6 +1038,7 @@ body{
   .teacher-menu-btn{display:block}.teacher-header{justify-content:flex-start}.teacher-header .teacher-live-badge{margin-left:auto}.teacher-quick-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:600px){
+  .student-content-grid{grid-template-columns:1fr}
   .teacher-main{width:min(100% - 1.2rem,1240px);padding-top:.7rem}.teacher-header{padding:.75rem}.teacher-header>div small{display:none}.teacher-live-badge{font-size:.62rem}
   .teacher-hero{padding:1.25rem}.teacher-quick-grid{grid-template-columns:1fr 1fr;gap:.6rem}.teacher-quick-grid button{min-height:130px;padding:1rem}.teacher-classroom-list{grid-template-columns:1fr}
   .teacher-classroom-card{grid-template-columns:42px 1fr}.classroom-code-wrap{grid-column:1/-1;text-align:left}.teacher-classroom-card button{grid-column:1/-1}.teacher-panel{padding:1rem}
