@@ -59,6 +59,7 @@ function showStudentClassroom(profile, session, classroom) {
   appShell.hidden = false;
   showStudentAccount(profile, session);
   window.chemquestSetStudentGrade?.(classroom.grade);
+  window.chemquestStudentClasses.load(classroom.id);
 }
 
 function showStudentJoin() {
@@ -73,6 +74,7 @@ function showStudentJoin() {
 
 function showSignedOut() {
   displayedUserId = null;
+  window.chemquestStudentClasses?.reset();
   authScreen.hidden = false;
   appShell.hidden = true;
   teacherShell.hidden = true;

@@ -100,7 +100,7 @@
   }
 
   function renderQuizDrafts() {
-    $('teacher-quiz-list').innerHTML = quizDrafts.length ? quizDrafts.map(item => `<article class="teacher-content-card"><span>🧪</span><div><strong>${escapeHtml(item.title)}</strong><small>Grado ${item.grade} · Hasta ${item.questions} preguntas</small></div><b>${item.status === 'published' ? 'Publicado' : 'Borrador'}</b><button class="teacher-secondary-btn" type="button" data-edit-quiz-id="${item.id}">Ver y editar preguntas</button></article>`).join('') : '<div class="teacher-empty">Todavía no hay borradores de cuestionarios.</div>';
+    $('teacher-quiz-list').innerHTML = quizDrafts.length ? quizDrafts.map(item => `<article class="teacher-content-card"><span>🧪</span><div><strong>${escapeHtml(item.title)}</strong><small>Grado ${item.grade} · Hasta ${item.questions} preguntas</small></div><b>${item.status === 'published' ? 'Publicado' : 'Borrador'}</b><button class="teacher-secondary-btn" type="button" data-edit-quiz-id="${item.id}">Ver y editar preguntas</button>${item.status === 'published' ? '' : `<button class="teacher-primary-btn" type="button" data-publish-quiz-id="${item.id}">Publicar para estudiantes</button>`}</article>`).join('') : '<div class="teacher-empty">Todavía no hay borradores de cuestionarios.</div>';
   }
 
   function renderQuizQuestions() {
@@ -215,6 +215,18 @@
     quizQuestions.push(data); $('quiz-question-form').reset(); clearPastedQuestionImage(); renderQuizQuestions(); setStatus('Pregunta guardada correctamente.', 'success');
   }
 
+  async function publishQuiz(quizId) {
+    const quiz = quizDrafts.find(item => item.id === quizId);
+    if (!quiz) return;
+    const { count, error: countError } = await window.chemquestSupabase.from('quiz_questions')
+      .select('id', { count: 'exact', head: true }).eq('quiz_id', quizId);
+    if (countError) { setStatus(`No pudimos comprobar el quiz: ${countError.message}`, 'error'); return; }
+    if (!count) { setStatus('Añade al menos una pregunta antes de publicar el quiz.', 'error'); return; }
+    const { error } = await window.chemquestSupabase.from('teacher_quizzes').update({ status: 'published' }).eq('id', quizId);
+    if (error) { setStatus(`No se pudo publicar el quiz: ${error.message}`, 'error'); return; }
+    quiz.status = 'published'; renderQuizDrafts(); setStatus('Quiz publicado para los estudiantes del grado.', 'success');
+  }
+
   function closeQuizEditor() {
     selectedQuiz = null; quizQuestions = []; $('teacher-quiz-editor').hidden = true; $('quiz-question-form').reset(); clearPastedQuestionImage();
   }
@@ -272,6 +284,11 @@
   $('refresh-classrooms-btn').addEventListener('click', loadClassrooms); $('copy-classroom-code-btn').addEventListener('click', copyClassroomCode); studentGradeFilter.addEventListener('change', renderStudentClassrooms);
   classroomList.addEventListener('click', event => { const target = event.target.closest('[data-classroom-id]'); if (target) openClassroom(target.dataset.classroomId); });
   studentClassrooms.addEventListener('click', event => { const target = event.target.closest('[data-student-classroom-id]'); if (target) openClassroom(target.dataset.studentClassroomId); });
-  $('teacher-quiz-list').addEventListener('click', event => { const target = event.target.closest('[data-edit-quiz-id]'); if (target) openQuizEditor(target.dataset.editQuizId); });
+  $('teacher-quiz-list').addEventListener('click', event => {
+    const edit = event.target.closest('[data-edit-quiz-id]');
+    const publish = event.target.closest('[data-publish-quiz-id]');
+    if (edit) openQuizEditor(edit.dataset.editQuizId);
+    if (publish) publishQuiz(publish.dataset.publishQuizId);
+  });
   renderQuizDrafts(); window.chemquestTeacher = { shell, initialize, reset };
 })();

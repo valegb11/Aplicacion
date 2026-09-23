@@ -34,5 +34,10 @@ Después de ejecutarlo, `verify_02_classrooms_and_modules.sql` comprueba las
 tablas y sus reglas sin modificar información. `TOMORROW_CHECKLIST.md` contiene
 el orden recomendado para la siguiente sesión.
 
+`03_share_teacher_content.sql` crea la relación entre salones y quizzes,
+comparte automáticamente las clases y quizzes con los salones del mismo grado,
+y permite que los estudiantes lean únicamente los quizzes publicados y sus
+preguntas. También vincula el contenido que existía antes de ejecutar el archivo.
+
 Ejecuta los archivos en orden y solo después de revisar cada paso. Nunca pegues
 aquí contraseñas, claves `secret` o `service_role`.

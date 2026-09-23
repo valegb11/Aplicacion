@@ -285,6 +285,17 @@
       <div class="xp-bar-label" id="xp-label">0 / 200 XP</div>
     </div>
 
+    <section id="student-classes" hidden aria-labelledby="student-classes-heading">
+      <h2 class="map-title" id="student-classes-heading">📚 Contenido de tu docente</h2>
+      <button class="teacher-secondary-btn" id="refresh-student-classes" type="button">Actualizar contenido</button>
+      <h3>Clases</h3>
+      <p id="student-class-status" role="status"></p>
+      <div id="student-class-list"></div>
+      <h3>Quizzes</h3>
+      <p id="student-quiz-status" role="status"></p>
+      <div id="student-quiz-list"></div>
+    </section>
+
     <!-- Days Map -->
     <div class="map-title">🗺 Mapa de lecciones</div>
     <div class="days-map" id="days-map"></div>
@@ -369,8 +380,9 @@
 <!-- Librería que permite que ChemQuest se comunique con Supabase. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="assets/js/supabase-client.js"></script>
-<script src="assets/js/teacher.js"></script>
+<script src="assets/js/teacher.js?v=2"></script>
 <script src="assets/js/app.js?v=2"></script>
-<script src="assets/js/auth.js?v=7"></script>
+<script src="assets/js/student-classes.js?v=1"></script>
+<script src="assets/js/auth.js?v=8"></script>
 </body>
 </html>
