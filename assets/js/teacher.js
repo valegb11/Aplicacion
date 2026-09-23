@@ -280,14 +280,23 @@
       const result = await window.chemquestSupabase.from('student_progress').select('student_id, total_xp, level, completed_days, updated_at').in('student_id', ids);
       if (!result.error) progressRows = result.data || [];
     }
-    const moduleResult = await window.chemquestSupabase.from('classroom_modules').select('module_id').eq('classroom_id', classroomId);
+    const [moduleResult, quizAssignmentResult] = await Promise.all([
+      window.chemquestSupabase.from('classroom_modules').select('module_id').eq('classroom_id', classroomId),
+      window.chemquestSupabase.from('classroom_quizzes').select('quiz_id').eq('classroom_id', classroomId)
+    ]);
     const assignedModuleIds = (moduleResult.data || []).map(item => `module:${item.module_id}`);
+    const assignedQuizIds = (quizAssignmentResult.data || []).map(item => item.quiz_id);
+    let quizAttempts = [];
+    if (ids.length && assignedQuizIds.length) {
+      const result = await window.chemquestSupabase.from('quiz_attempts').select('student_id, quiz_id').in('student_id', ids).in('quiz_id', assignedQuizIds);
+      if (!result.error) quizAttempts = result.data || [];
+    }
     const byId = Object.fromEntries(profiles.map(profile => [profile.id, profile]));
     const progressById = Object.fromEntries(progressRows.map(progress => [progress.student_id, progress]));
     $('teacher-roster-empty').hidden = memberships.length > 0;
-    rosterList.innerHTML = memberships.map(membership => { const profile = byId[membership.student_id] || {}; const progress = progressById[membership.student_id] || {}; const displayName = profile.full_name || profile.email || 'Estudiante'; const completedDays = progress.completed_days || []; const builtInCompleted = completedDays.filter(day => String(day).startsWith(`d${selectedClassroom.grade}-`)).length; const teacherCompleted = assignedModuleIds.filter(id => completedDays.includes(id)).length; const completed = builtInCompleted + teacherCompleted; const totalClasses = 6 + assignedModuleIds.length; const percent = Math.round((completed / totalClasses) * 100); return `<article class="teacher-roster-item">
+    rosterList.innerHTML = memberships.map(membership => { const profile = byId[membership.student_id] || {}; const progress = progressById[membership.student_id] || {}; const displayName = profile.full_name || profile.email || 'Estudiante'; const completedDays = progress.completed_days || []; const builtInCompleted = completedDays.filter(day => String(day).startsWith(`d${selectedClassroom.grade}-`)).length; const teacherCompleted = assignedModuleIds.filter(id => completedDays.includes(id)).length; const completedQuizzes = new Set(quizAttempts.filter(attempt => attempt.student_id === membership.student_id).map(attempt => attempt.quiz_id)).size; const completed = builtInCompleted + teacherCompleted + completedQuizzes; const totalActivities = 6 + assignedModuleIds.length + assignedQuizIds.length; const percent = Math.round((completed / totalActivities) * 100); return `<article class="teacher-roster-item">
       <div class="teacher-avatar">${escapeHtml(displayName.charAt(0).toUpperCase() || 'E')}</div><div class="teacher-student-identity"><strong>${escapeHtml(displayName)}</strong><small>${escapeHtml(profile.email || '')}</small></div>
-      <div class="teacher-progress"><div><span>Avance general</span><b>${percent}%</b></div><div class="teacher-progress-track"><i style="width:${percent}%"></i></div><small>${completed} de ${totalClasses} clases · ${progress.total_xp || 0} EXP · Nivel ${progress.level || 1}</small></div><div class="teacher-roster-date">${progress.updated_at ? `Actividad ${escapeHtml(formatDate(progress.updated_at))}` : `Desde ${escapeHtml(formatDate(membership.joined_at))}`}</div>
+      <div class="teacher-progress"><div><span>Avance general</span><b>${percent}%</b></div><div class="teacher-progress-track"><i style="width:${percent}%"></i></div><small>${completed} de ${totalActivities} actividades · ${progress.total_xp || 0} EXP · Nivel ${progress.level || 1}</small></div><div class="teacher-roster-date">${progress.updated_at ? `Actividad ${escapeHtml(formatDate(progress.updated_at))}` : `Desde ${escapeHtml(formatDate(membership.joined_at))}`}</div>
     </article>`; }).join(''); setStatus('');
     clearTimeout(rosterRefreshTimer);
     rosterRefreshTimer = setTimeout(() => { if (activeView === 'students' && selectedClassroom?.id === classroomId) openClassroom(classroomId, true); }, 5000);
