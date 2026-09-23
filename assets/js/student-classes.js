@@ -28,6 +28,17 @@
   const teacherQuizCounter = document.getElementById('teacher-quiz-counter');
   const teacherQuizProgress = document.getElementById('teacher-quiz-progress');
 
+  function scrollActivityIntoView(target) {
+    requestAnimationFrame(() => {
+      const topbar = target.closest('.screen')?.querySelector('.lesson-topbar, .quiz-topbar');
+      const offset = (topbar?.offsetHeight || 0) + 16;
+      const top = Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset);
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+      target.focus({ preventScroll: true });
+      window.scrollTo({ top, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    });
+  }
+
   function makeSlides(module) {
     const source = (module.description || 'Esta clase todavía no tiene contenido.').trim();
     const paragraphs = source.split(/\n\s*\n/).map(value => value.trim()).filter(Boolean);
@@ -100,6 +111,7 @@
     actions.append(previous, next); card.append(actions); lessonContent.append(card);
     const dots = document.createElement('div'); dots.className = 'teacher-lesson-dots';
     lessonSlides.forEach((_, index) => { const dot = document.createElement('i'); if (index === lessonSlide) dot.className = 'active'; dots.append(dot); }); lessonContent.append(dots);
+    scrollActivityIntoView(card);
   }
 
   function openTeacherLesson(module) {
@@ -128,6 +140,7 @@
     const next = document.createElement('button'); next.type = 'button'; next.className = 'teacher-primary-btn'; next.textContent = activeQuestion === activeQuizQuestions.length - 1 ? 'Entregar quiz' : 'Siguiente →'; next.disabled = activeAnswers[activeQuestion] === undefined;
     next.addEventListener('click', async () => { if (activeQuestion < activeQuizQuestions.length - 1) { activeQuestion++; renderTeacherQuiz(); return; } await submitTeacherQuiz(next); });
     actions.append(previous, next); teacherQuizContent.append(options, actions);
+    scrollActivityIntoView(teacherQuizContent);
   }
 
   async function submitTeacherQuiz(button) {
@@ -144,6 +157,7 @@
       result.append(heading, score, message);
     }
     const home = document.createElement('button'); home.type = 'button'; home.className = 'teacher-primary-btn'; home.style.marginTop = '1.25rem'; home.textContent = 'Volver al inicio'; home.addEventListener('click', () => { window.goHome(); refresh(); }); result.append(home); teacherQuizContent.append(result);
+    scrollActivityIntoView(teacherQuizContent);
   }
 
   function openTeacherQuiz(quiz) {
