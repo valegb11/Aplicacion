@@ -40,6 +40,15 @@
   }
 
   function makeSlides(module) {
+    const structured = parseStructuredLesson(module.description);
+    if (structured) {
+      return [
+        { eyebrow: '📖 RESUMEN', title: module.title, text: structured.summary, icon: '🧪', image: structured.image },
+        { eyebrow: '💡 DATO CLAVE', title: 'Idea importante', text: structured.keyIdea, icon: '💡' },
+        { eyebrow: '🔎 EJEMPLO', title: 'Veámoslo en un ejemplo', text: structured.example, icon: '🔎' },
+        { eyebrow: '⚡ COMPROBACIÓN RÁPIDA', title: 'Antes de terminar…', check: true, text: `¿Qué tan claro quedó el tema “${module.title}”?` }
+      ];
+    }
     const source = (module.description || 'Esta clase todavía no tiene contenido.').trim();
     const paragraphs = source.split(/\n\s*\n/).map(value => value.trim()).filter(Boolean);
     const chunks = [];
@@ -60,6 +69,14 @@
       icon: index === 0 ? '🧪' : index % 2 ? '🔎' : '💡'
     }));
     return [...contentSlides, { eyebrow: '⚡ COMPROBACIÓN RÁPIDA', title: 'Antes de terminar…', check: true, text: `¿Qué tan claro quedó el tema “${module.title}”?` }];
+  }
+
+  function parseStructuredLesson(value) {
+    try {
+      const lesson = JSON.parse(value);
+      if (lesson?.format === 'chemquest-lesson-v2') return lesson;
+    } catch (_) { /* Mantiene visibles las clases creadas antes de este formato. */ }
+    return null;
   }
 
   function extractFormulas(text) {
@@ -88,12 +105,15 @@
       card.append(question, choices, tip);
     } else {
       const visual = document.createElement('div'); visual.className = 'teacher-lesson-visual';
+      if (slide.image) {
+        const image = document.createElement('img'); image.className = 'teacher-lesson-image'; image.src = slide.image; image.alt = `Imagen de apoyo: ${activeModule.title}`; visual.append(image);
+      }
       const formulas = extractFormulas(slide.text);
-      if (formulas.length) {
+      if (formulas.length && !slide.image) {
         const formulaWrap = document.createElement('div'); formulaWrap.className = 'teacher-lesson-formulas';
         formulas.forEach(value => { const formula = document.createElement('span'); formula.className = 'teacher-lesson-formula'; formula.textContent = value; formulaWrap.append(formula); });
         visual.append(formulaWrap);
-      } else { const icon = document.createElement('span'); icon.className = 'teacher-lesson-visual-icon'; icon.textContent = slide.icon; visual.append(icon); }
+      } else if (!slide.image) { const icon = document.createElement('span'); icon.className = 'teacher-lesson-visual-icon'; icon.textContent = slide.icon; visual.append(icon); }
       const copy = document.createElement('p'); copy.className = 'slide-text'; copy.style.whiteSpace = 'pre-wrap'; copy.textContent = slide.text;
       const tip = document.createElement('div'); tip.className = 'teacher-lesson-tip'; tip.textContent = lessonSlide === 0 ? '💡 Lee con calma. El contenido está dividido para que sea más fácil de comprender.' : '💡 Relaciona esta explicación con lo que viste en la pantalla anterior.';
       card.append(visual, copy, tip);

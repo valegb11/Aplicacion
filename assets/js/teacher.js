@@ -19,6 +19,7 @@
   let selectedQuiz = null;
   let quizQuestions = [];
   let pastedQuestionImage = null;
+  let classImage = null;
   let activeView = 'overview';
   let rosterRefreshTimer = null;
 
@@ -31,6 +32,13 @@
     $('quiz-image-preview').hidden = true;
     $('quiz-image-preview-img').removeAttribute('src');
     $('quiz-image-paste-zone').hidden = false;
+  }
+
+  function clearClassImage() {
+    classImage = null;
+    $('class-image').value = '';
+    $('class-image-preview').hidden = true;
+    $('class-image-preview-img').removeAttribute('src');
   }
 
   function compressClipboardImage(file) {
@@ -68,6 +76,19 @@
     } catch (error) { setStatus(error.message, 'error'); }
   }
 
+  async function selectClassImage(event) {
+    const [file] = event.target.files || [];
+    if (!file) return;
+    try {
+      classImage = await compressClipboardImage(file);
+      $('class-image-preview-img').src = classImage;
+      $('class-image-preview').hidden = false;
+    } catch (error) {
+      clearClassImage();
+      setStatus(error.message, 'error');
+    }
+  }
+
   function showView(view) {
     activeView = view;
     document.querySelectorAll('[data-view-panel]').forEach(panel => { const active = panel.dataset.viewPanel === view; panel.hidden = !active; panel.classList.toggle('active', active); });
@@ -99,9 +120,20 @@
     </button>`).join('') : '<div class="teacher-empty">No hay salones en este grado.</div>';
   }
 
+  function parseLesson(value) {
+    try {
+      const lesson = JSON.parse(value);
+      if (lesson && lesson.format === 'chemquest-lesson-v2') return lesson;
+    } catch (_) { /* Las clases antiguas permanecen compatibles. */ }
+    return { summary: value || '' };
+  }
+
   function renderModules() {
     $('teacher-module-count').textContent = studyModules.length;
-    $('teacher-class-list').innerHTML = studyModules.length ? studyModules.map(item => `<article class="teacher-content-card"><span>📘</span><div><strong>${escapeHtml(item.title)}</strong><small>Grado ${item.grade} · ${escapeHtml(item.description || 'Sin descripción')}</small></div><b>Guardada</b></article>`).join('') : '<div class="teacher-empty">Todavía no has creado clases.</div>';
+    $('teacher-class-list').innerHTML = studyModules.length ? studyModules.map(item => {
+      const lesson = parseLesson(item.description);
+      return `<article class="teacher-content-card"><span>📘</span><div><strong>${escapeHtml(item.title)}</strong><small>Grado ${item.grade} · ${escapeHtml(lesson.summary || 'Sin resumen')}</small></div><b>Guardada</b></article>`;
+    }).join('') : '<div class="teacher-empty">Todavía no has creado clases.</div>';
   }
 
   function renderQuizDrafts() {
@@ -199,10 +231,17 @@
 
   async function createClass(event) {
     event.preventDefault();
-    const payload = { title: $('class-title').value.trim(), description: $('class-description').value.trim(), grade: Number($('class-grade').value), created_by: currentSession.user.id };
+    const lesson = {
+      format: 'chemquest-lesson-v2',
+      summary: $('class-summary').value.trim(),
+      keyIdea: $('class-key-idea').value.trim(),
+      example: $('class-example').value.trim(),
+      image: classImage
+    };
+    const payload = { title: $('class-title').value.trim(), description: JSON.stringify(lesson), grade: Number($('class-grade').value), created_by: currentSession.user.id };
     const { data, error } = await window.chemquestSupabase.from('study_modules').insert(payload).select('id, title, description, grade, created_at').single();
     if (error) { setStatus(`No se pudo guardar la clase: ${error.message}`, 'error'); return; }
-    studyModules.unshift(data); $('create-class-form').reset(); renderModules(); setStatus('Clase guardada correctamente.', 'success');
+    studyModules.unshift(data); $('create-class-form').reset(); clearClassImage(); renderModules(); setStatus('Clase guardada y organizada para los estudiantes.', 'success');
   }
 
   async function createQuizDraft(event) {
@@ -320,7 +359,7 @@
     $('create-classroom-btn').disabled = assignedGrades.length === 0; showView('overview'); await Promise.all([loadClassrooms(), loadModules(), loadQuizzes()]); await loadQuizResults();
   }
 
-  function reset() { clearTimeout(rosterRefreshTimer); currentSession = null; classrooms = []; selectedClassroom = null; assignedGrades = []; studyModules = []; quizDrafts = []; selectedQuiz = null; quizQuestions = []; classroomList.innerHTML = ''; rosterList.innerHTML = ''; quizResultsList.innerHTML = ''; quizResultsEmpty.hidden = false; rosterPanel.hidden = true; $('teacher-quiz-editor').hidden = true; clearPastedQuestionImage(); }
+  function reset() { clearTimeout(rosterRefreshTimer); currentSession = null; classrooms = []; selectedClassroom = null; assignedGrades = []; studyModules = []; quizDrafts = []; selectedQuiz = null; quizQuestions = []; classroomList.innerHTML = ''; rosterList.innerHTML = ''; quizResultsList.innerHTML = ''; quizResultsEmpty.hidden = false; rosterPanel.hidden = true; $('teacher-quiz-editor').hidden = true; clearPastedQuestionImage(); clearClassImage(); }
 
   document.querySelectorAll('[data-teacher-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.teacherView)));
   document.querySelectorAll('[data-go-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.goView)));
@@ -330,6 +369,8 @@
   $('quiz-image-paste-zone').addEventListener('paste', pasteQuestionImage);
   $('quiz-image-paste-zone').addEventListener('click', () => $('quiz-image-paste-zone').focus());
   $('remove-quiz-image-btn').addEventListener('click', clearPastedQuestionImage);
+  $('class-image').addEventListener('change', selectClassImage);
+  $('remove-class-image-btn').addEventListener('click', clearClassImage);
   $('refresh-classrooms-btn').addEventListener('click', loadClassrooms); $('copy-classroom-code-btn').addEventListener('click', copyClassroomCode); studentGradeFilter.addEventListener('change', renderStudentClassrooms);
   $('refresh-roster-btn').addEventListener('click', () => { if (selectedClassroom) openClassroom(selectedClassroom.id, true); });
   $('refresh-quiz-results-btn').addEventListener('click', loadQuizResults);

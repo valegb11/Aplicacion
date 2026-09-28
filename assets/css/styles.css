@@ -1056,6 +1056,11 @@ body{
   .teacher-quiz-result-card{grid-template-columns:1fr auto}.teacher-quiz-result-card>div:nth-child(2),.teacher-quiz-result-card time{grid-column:1/-1}
 }
 
+#class-image-preview{margin:.65rem 0}
+#class-image-preview img{max-height:220px}
+.teacher-form-help{margin:.5rem 0 1rem;color:var(--muted);font-size:.84rem;line-height:1.45}
+.teacher-lesson-image{display:block;max-width:100%;max-height:360px;border-radius:12px;object-fit:contain}
+
 /* Clases y quizzes del docente en pantallas de actividad */
 .student-quiz-launch>span:first-child{background:rgba(167,139,250,.12)}
 .student-quiz-launch>span:last-child{color:var(--purple)}
