@@ -1,1 +1,22 @@
 .apparatus.volumetric-flask{width:175px;height:190px;margin-top:45px;border:6px solid #bae6fdb3;border-radius:50%}.apparatus.volumetric-flask:before{content:"";position:absolute;left:61px;top:-82px;width:42px;height:82px;border:6px solid #bae6fdb3;border-bottom:0;border-radius:8px 8px 0 0}.apparatus.volumetric-flask:after{content:"20 °C · 250 mL";position:absolute;left:30px;right:30px;top:45px;color:#cbd5e1;font-size:.55rem}.apparatus.volumetric-flask .reaction-liquid{border-radius:0 0 80px 80px}.apparatus.erlenmeyer{width:210px;height:210px;margin-top:35px;border:6px solid #bae6fdb3;border-radius:12px 12px 45px 45px;clip-path:polygon(35% 0,65% 0,65% 20%,100% 100%,0 100%,35% 20%)}.apparatus.erlenmeyer:before{display:none}.apparatus.erlenmeyer .reaction-liquid{left:10px;right:10px;border-radius:0 0 35px 35px}.apparatus.cylinder{width:82px;height:245px;border:5px solid #bae6fdb3;border-radius:5px 5px 15px 15px;background:repeating-linear-gradient(to bottom,transparent 0 15px,#bae6fd66 16px 17px)}.apparatus.cylinder:before{content:"";position:absolute;left:-25px;right:-25px;bottom:-14px;top:auto;height:14px;border:5px solid #bae6fdb3;border-radius:5px}.apparatus.cylinder .reaction-liquid{border-radius:0 0 10px 10px}.lab-scene.measuring .reaction-effect:after{content:"💧   💧";animation:pipetteDrops .8s linear 3}.lab-scene.titrating .reaction-effect:after{content:"💧";animation:titrationDrop 1.2s linear 3}.lab-scene.titrating .reaction-liquid{animation:titrationColor 2.5s ease-in-out forwards}@keyframes pipetteDrops{from{transform:translateY(-90px);opacity:0}to{transform:translateY(70px);opacity:1}}@keyframes titrationDrop{0%{transform:translateY(-120px);opacity:1}80%{transform:translateY(60px);opacity:1}100%{opacity:0}}@keyframes titrationColor{to{background:#c084fc99}}
+
+/* Matraz Erlenmeyer: silueta continua con cuello, hombros y base. */
+.apparatus.erlenmeyer{
+  position:relative;width:220px;height:235px;margin-top:18px;
+  border:0;border-radius:0;clip-path:none;background:#bae6fdb3;
+  clip-path:polygon(36% 0,64% 0,64% 25%,96% 88%,96% 92%,91% 97%,82% 100%,18% 100%,9% 97%,4% 92%,4% 88%,36% 25%);
+}
+.apparatus.erlenmeyer:before{
+  content:"";display:block;position:absolute;inset:7px;
+  border:0;border-radius:0;background:#07111f;
+  clip-path:polygon(36% 0,64% 0,64% 25%,96% 88%,96% 91%,90% 96%,81% 99%,19% 99%,10% 96%,4% 91%,4% 88%,36% 25%);
+}
+.apparatus.erlenmeyer:after{
+  content:"";position:absolute;left:34%;top:0;width:32%;height:7px;
+  border-radius:999px;background:#d7f3ff;box-shadow:0 3px 0 #6f93a6;
+}
+.apparatus.erlenmeyer .reaction-liquid{
+  z-index:2;left:12px;right:12px;bottom:8px;height:43%;
+  border-radius:8px 8px 42px 42px;
+  clip-path:polygon(13% 0,87% 0,100% 100%,0 100%);
+}
