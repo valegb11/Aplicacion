@@ -11,6 +11,7 @@
   const quizResultsEmpty = $('teacher-quiz-results-empty');
   const viewTitles = { overview: 'Resumen', classrooms: 'Mis salones', 'create-classroom': 'Crear salón', students: 'Estudiantes y avances', classes: 'Clases', quizzes: 'Cuestionarios' };
   let currentSession = null;
+  let workspaceTeacherId = null;
   let classrooms = [];
   let selectedClassroom = null;
   let assignedGrades = [];
@@ -152,7 +153,7 @@
   async function loadClassrooms() {
     if (!window.chemquestSupabase || !currentSession) return;
     $('refresh-classrooms-btn').disabled = true; setStatus('Cargando tus salones…');
-    const { data = [], error } = await window.chemquestSupabase.from('classrooms').select('id, name, grade, join_code, created_at').eq('teacher_id', currentSession.user.id).order('created_at', { ascending: true });
+    const { data = [], error } = await window.chemquestSupabase.from('classrooms').select('id, name, grade, join_code, created_at').eq('teacher_id', workspaceTeacherId).order('created_at', { ascending: true });
     if (error) { setStatus(`No se pudieron cargar los salones: ${error.message}`, 'error'); $('refresh-classrooms-btn').disabled = false; return; }
     const ids = data.map(item => item.id); let memberships = [];
     if (ids.length) { const result = await window.chemquestSupabase.from('classroom_members').select('classroom_id').in('classroom_id', ids); if (!result.error) memberships = result.data || []; }
@@ -162,7 +163,7 @@
   }
 
   async function loadModules() {
-    const { data = [], error } = await window.chemquestSupabase.from('study_modules').select('id, title, description, grade, created_at').eq('created_by', currentSession.user.id).order('created_at', { ascending: false });
+    const { data = [], error } = await window.chemquestSupabase.from('study_modules').select('id, title, description, grade, created_at').eq('created_by', workspaceTeacherId).order('created_at', { ascending: false });
     if (!error) studyModules = data;
     renderModules();
   }
@@ -170,7 +171,7 @@
   async function loadQuizzes() {
     const { data = [], error } = await window.chemquestSupabase.from('teacher_quizzes')
       .select('id, title, grade, question_count, status, created_at')
-      .eq('created_by', currentSession.user.id).order('created_at', { ascending: false });
+      .eq('created_by', workspaceTeacherId).order('created_at', { ascending: false });
     if (!error) quizDrafts = data.map(item => ({ ...item, questions: item.question_count }));
     renderQuizDrafts();
   }
@@ -220,7 +221,7 @@
       return;
     }
     $('create-classroom-btn').disabled = true;
-    const { data, error } = await window.chemquestSupabase.from('classrooms').insert({ name: cleanName, grade: selectedGrade, teacher_id: currentSession.user.id }).select('id, name, grade, join_code, created_at').single();
+    const { data, error } = await window.chemquestSupabase.from('classrooms').insert({ name: cleanName, grade: selectedGrade, teacher_id: workspaceTeacherId }).select('id, name, grade, join_code, created_at').single();
     $('create-classroom-btn').disabled = false;
     if (error) {
       setStatus(error.code === '23505' ? 'Este salón ya fue creado' : `No se pudo crear el salón: ${error.message}`, 'error');
@@ -238,7 +239,7 @@
       example: $('class-example').value.trim(),
       image: classImage
     };
-    const payload = { title: $('class-title').value.trim(), description: JSON.stringify(lesson), grade: Number($('class-grade').value), created_by: currentSession.user.id };
+    const payload = { title: $('class-title').value.trim(), description: JSON.stringify(lesson), grade: Number($('class-grade').value), created_by: workspaceTeacherId };
     const { data, error } = await window.chemquestSupabase.from('study_modules').insert(payload).select('id, title, description, grade, created_at').single();
     if (error) { setStatus(`No se pudo guardar la clase: ${error.message}`, 'error'); return; }
     studyModules.unshift(data); $('create-class-form').reset(); clearClassImage(); renderModules(); setStatus('Clase guardada y organizada para los estudiantes.', 'success');
@@ -246,7 +247,7 @@
 
   async function createQuizDraft(event) {
     event.preventDefault();
-    const payload = { title: $('quiz-title').value.trim(), grade: Number($('quiz-grade').value), question_count: Number($('quiz-question-count').value), status: 'draft', created_by: currentSession.user.id };
+    const payload = { title: $('quiz-title').value.trim(), grade: Number($('quiz-grade').value), question_count: Number($('quiz-question-count').value), status: 'draft', created_by: workspaceTeacherId };
     const { data, error } = await window.chemquestSupabase.from('teacher_quizzes').insert(payload).select('id, title, grade, question_count, status, created_at').single();
     if (error) { setStatus(`No se pudo crear el quiz: ${error.message}`, 'error'); return; }
     const newQuiz = { ...data, questions: data.question_count };
@@ -346,11 +347,11 @@
     try { await navigator.clipboard.writeText(selectedClassroom.join_code); setStatus(`Código ${selectedClassroom.join_code} copiado.`, 'success'); } catch (_error) { setStatus(`Código: ${selectedClassroom.join_code}`, 'success'); }
   }
 
-  async function initialize(profile, session) {
-    currentSession = session; selectedClassroom = null; rosterPanel.hidden = true;
+  async function initialize(profile, session, ownerTeacherId = session.user.id) {
+    currentSession = session; workspaceTeacherId = ownerTeacherId; selectedClassroom = null; rosterPanel.hidden = true;
     const displayName = profile.full_name || profile.email || 'docente';
     $('teacher-name').textContent = displayName.split(' ')[0]; $('teacher-sidebar-name').textContent = displayName; $('teacher-account-chip').textContent = profile.email || displayName;
-    const { data: rows = [], error } = await window.chemquestSupabase.from('teacher_grades').select('grade').eq('teacher_id', session.user.id).order('grade', { ascending: true });
+    const { data: rows = [], error } = await window.chemquestSupabase.from('teacher_grades').select('grade').eq('teacher_id', workspaceTeacherId).order('grade', { ascending: true });
     if (error) { assignedGrades = []; setStatus(`No se pudieron cargar tus grados: ${error.message}`, 'error'); return; }
     assignedGrades = rows.map(row => row.grade); const gradeText = assignedGrades.length ? assignedGrades.map(value => `${value}.º`).join(' y ') : 'Sin asignar';
     $('teacher-grade').textContent = gradeText; $('teacher-header-grades').textContent = gradeText;
@@ -359,7 +360,7 @@
     $('create-classroom-btn').disabled = assignedGrades.length === 0; showView('overview'); await Promise.all([loadClassrooms(), loadModules(), loadQuizzes()]); await loadQuizResults();
   }
 
-  function reset() { clearTimeout(rosterRefreshTimer); currentSession = null; classrooms = []; selectedClassroom = null; assignedGrades = []; studyModules = []; quizDrafts = []; selectedQuiz = null; quizQuestions = []; classroomList.innerHTML = ''; rosterList.innerHTML = ''; quizResultsList.innerHTML = ''; quizResultsEmpty.hidden = false; rosterPanel.hidden = true; $('teacher-quiz-editor').hidden = true; clearPastedQuestionImage(); clearClassImage(); }
+  function reset() { clearTimeout(rosterRefreshTimer); currentSession = null; workspaceTeacherId = null; classrooms = []; selectedClassroom = null; assignedGrades = []; studyModules = []; quizDrafts = []; selectedQuiz = null; quizQuestions = []; classroomList.innerHTML = ''; rosterList.innerHTML = ''; quizResultsList.innerHTML = ''; quizResultsEmpty.hidden = false; rosterPanel.hidden = true; $('teacher-quiz-editor').hidden = true; clearPastedQuestionImage(); clearClassImage(); }
 
   document.querySelectorAll('[data-teacher-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.teacherView)));
   document.querySelectorAll('[data-go-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.goView)));

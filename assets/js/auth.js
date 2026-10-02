@@ -132,10 +132,12 @@ async function showAuthenticatedExperience(session) {
     profile.full_name = pendingRegistration.name;
   }
 
-  if (isDefaultTeacher(profile, session)) {
+  const workspaceResult = await window.chemquestSupabase.rpc('get_teacher_workspace_owner');
+  const workspaceOwnerId = workspaceResult.error ? null : workspaceResult.data;
+  if (isDefaultTeacher(profile, session) || workspaceOwnerId) {
     appShell.hidden = true;
     teacherShell.hidden = false;
-    await window.chemquestTeacher.initialize(profile, session);
+    await window.chemquestTeacher.initialize(profile, session, workspaceOwnerId || session.user.id);
     return;
   }
 

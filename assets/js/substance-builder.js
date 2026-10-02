@@ -1,0 +1,23 @@
+(() => {
+  const cabinet=document.querySelector('.vl-cabinet'),shelf=document.getElementById('reagent-shelf');
+  if(!cabinet||!shelf)return;
+  const symbols='H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og'.split(' ');
+  const known={CH3COOH:'vinegar',NaHCO3:'bicarb',CuSO4:'cuso4',NaOH:'naoh',HCl:'hcl',CaCO3:'caco3',Fe:'iron',H2O2:'h2o2',KI:'ki'};
+  let parts=[];
+  const launcher=document.createElement('section');launcher.className='substance-creator';launcher.innerHTML='<div><span>✏️</span><p><strong>Crea tu sustancia</strong><small>Construye una fórmula y diseña su recipiente.</small></p></div><button id="open-substance-builder">+ Crear</button>';
+  cabinet.insertBefore(launcher,shelf);
+  const modal=document.createElement('div');modal.className='substance-modal';modal.innerHTML=`<form class="substance-dialog" id="substance-form"><button class="dialog-close" type="button">×</button><span class="builder-kicker">GABINETE PERSONALIZADO</span><h2>Crear una sustancia</h2><label>Nombre del recipiente<input id="substance-name" required maxlength="28" placeholder="Ejemplo: Vinagre"></label><div class="formula-workbench"><div><label>Elemento<select id="builder-element">${symbols.map(s=>`<option>${s}</option>`).join('')}</select></label><label>Subíndice<input id="builder-subscript" type="number" min="1" max="12" value="1"></label><button id="add-formula-part" type="button">Agregar elemento</button></div><div class="formula-preview"><small>FÓRMULA CONSTRUIDA</small><strong id="formula-preview">—</strong><div id="formula-parts"></div><button id="clear-formula" type="button">Borrar fórmula</button></div></div><div class="coefficient-row"><label>Coeficiente<input id="builder-coefficient" type="number" min="1" max="9" value="1"></label><p>El coeficiente indica cuántas unidades de la sustancia usarás; los subíndices forman su fórmula.</p></div><div class="vessel-custom"><label>Recipiente<select id="vessel-shape"><option value="flask">Matraz</option><option value="bottle">Frasco</option><option value="tube">Tubo</option></select></label><label>Color del contenido<input id="vessel-color" type="color" value="#22d3ee"></label><div class="custom-vessel flask" id="custom-vessel"><i></i></div></div><button class="save-substance" type="submit">Guardar en el gabinete</button><p class="builder-note">El laboratorio guardará la fórmula tal como la construyas y observará qué sucede al mezclarla.</p></form>`;
+  document.body.append(modal);
+  const $=id=>document.getElementById(id);
+  function pretty(){return parts.map(p=>p.symbol+(p.count>1?toSub(p.count):'')).join('')}
+  function plain(){return parts.map(p=>p.symbol+(p.count>1?p.count:'')).join('')}
+  function toSub(n){return String(n).replace(/\d/g,d=>'₀₁₂₃₄₅₆₇₈₉'[d])}
+  function paint(){ $('formula-preview').textContent=parts.length?pretty():'—';$('formula-parts').innerHTML=parts.map((p,i)=>`<button type="button" data-remove-part="${i}" title="Quitar">${p.symbol}<sub>${p.count}</sub> ×</button>`).join('');document.querySelectorAll('[data-remove-part]').forEach(b=>b.onclick=()=>{parts.splice(+b.dataset.removePart,1);paint()}) }
+  $('open-substance-builder').onclick=()=>{modal.classList.add('open');$('substance-name').focus()};
+  modal.querySelector('.dialog-close').onclick=()=>modal.classList.remove('open');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('open')};
+  $('add-formula-part').onclick=()=>{parts.push({symbol:$('builder-element').value,count:Math.max(1,Math.min(12,+$('builder-subscript').value||1))});paint()};
+  $('clear-formula').onclick=()=>{parts=[];paint()};
+  function updateVessel(){const v=$('custom-vessel');v.className=`custom-vessel ${$('vessel-shape').value}`;v.style.setProperty('--liquid',$('vessel-color').value)}
+  $('vessel-shape').onchange=updateVessel;$('vessel-color').oninput=updateVessel;updateVessel();
+  $('substance-form').onsubmit=e=>{e.preventDefault();if(!parts.length)return;$('add-formula-part').focus();const formula=plain(),coefficient=Math.max(1,Math.min(9,+$('builder-coefficient').value||1)),shape=$('vessel-shape').value,color=$('vessel-color').value,id=known[formula]||`custom-${Date.now()}`;window.virtualLabAddReagent?.(id,{name:$('substance-name').value.trim(),formula,displayFormula:pretty(),grade:8,color,picture:shape,coefficient,custom:true});modal.classList.remove('open');parts=[];paint();e.target.reset();$('vessel-color').value=color;updateVessel()};
+})();
