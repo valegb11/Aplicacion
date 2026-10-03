@@ -11,7 +11,7 @@
   };
   const symbols=('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og').split(' ');
   let grade=8,loaded=[],tool='beaker';
-  function renderShelf(){ $('reagent-shelf').innerHTML=Object.entries(reagents).filter(([,r])=>r.grade<=grade).map(([id,r])=>`<button class="reagent-vial" draggable="true" data-reagent="${id}" style="--vial-color:${r.color}"><b>${r.formula}</b><span>${r.name}</span></button>`).join('');document.querySelectorAll('[data-reagent]').forEach(v=>{v.ondragstart=e=>e.dataTransfer.setData('text/plain',v.dataset.reagent);v.onclick=()=>load(v.dataset.reagent)})}
+  function renderShelf(){ $('reagent-shelf').innerHTML=Object.entries(reagents).map(([id,r])=>`<button class="reagent-vial" draggable="true" data-reagent="${id}" style="--vial-color:${r.color}"><b>${r.formula}</b><span>${r.name}</span></button>`).join('');document.querySelectorAll('[data-reagent]').forEach(v=>{v.ondragstart=e=>e.dataTransfer.setData('text/plain',v.dataset.reagent);v.onclick=()=>load(v.dataset.reagent)})}
   $('element-shelf').innerHTML=symbols.map(s=>`<button class="element-vial" title="Muestra de ${s}">${s}</button>`).join('');
   function load(id){if(loaded.includes(id)||loaded.length===2)return;loaded.push(id);paintLoaded()}
   function paintLoaded(){$('loaded-reagents').innerHTML=loaded.map(id=>`<span class="loaded-chip">${reagents[id].formula}</span>`).join('');$('mix-lab').disabled=loaded.length!==2}
