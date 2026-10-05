@@ -17,7 +17,7 @@ const registerCancelButton = document.getElementById('register-cancel-btn');
 const logoutButtons = document.querySelectorAll('#logout-btn, #teacher-logout-btn, #student-join-logout-btn');
 const authStatus = document.getElementById('auth-status');
 const accountChip = document.getElementById('account-chip');
-const DEFAULT_TEACHER_EMAIL = 'valentina.gonzalez@gimsabe.edu.co';
+const DEFAULT_TEACHER_EMAIL = 'valentina.gonzalez@gimsaber.edu.co';
 let displayedUserId = null;
 
 function isDefaultTeacher(profile, session) {

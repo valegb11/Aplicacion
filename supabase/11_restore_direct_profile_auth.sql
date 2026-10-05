@@ -34,11 +34,11 @@ declare
 begin
   select * into teacher_user
   from auth.users
-  where lower(email) = 'valentina.gonzalez@gimsabe.edu.co'
+  where lower(email) = 'valentina.gonzalez@gimsaber.edu.co'
   limit 1;
 
   if teacher_user.id is null then
-    raise exception 'No existe la cuenta valentina.gonzalez@gimsabe.edu.co en Authentication > Users';
+    raise exception 'No existe la cuenta valentina.gonzalez@gimsaber.edu.co en Authentication > Users';
   end if;
 
   insert into public.profiles (id, email, full_name, avatar_url, role)
@@ -65,5 +65,6 @@ commit;
 select p.id, p.email, p.role, array_agg(tg.grade order by tg.grade) as grados
 from public.profiles p
 left join public.teacher_grades tg on tg.teacher_id = p.id
-where lower(p.email) = 'valentina.gonzalez@gimsabe.edu.co'
+where lower(p.email) = 'valentina.gonzalez@gimsaber.edu.co'
 group by p.id, p.email, p.role;
+
