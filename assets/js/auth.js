@@ -17,7 +17,7 @@ const registerCancelButton = document.getElementById('register-cancel-btn');
 const logoutButtons = document.querySelectorAll('#logout-btn, #teacher-logout-btn, #student-join-logout-btn');
 const authStatus = document.getElementById('auth-status');
 const accountChip = document.getElementById('account-chip');
-const DEFAULT_TEACHER_EMAIL = 'valentina.gonzalez@gimsaber.edu.co';
+const DEFAULT_TEACHER_EMAIL = 'valentina.gonzalez@gimsabe.edu.co';
 let displayedUserId = null;
 
 function isDefaultTeacher(profile, session) {
@@ -86,20 +86,11 @@ function showSignedOut() {
 }
 
 async function showAuthenticatedExperience(session) {
-  let profile = null;
-  let profileError = null;
-  const rpcResult = await window.chemquestSupabase.rpc('get_my_profile');
-  if (!rpcResult.error) {
-    profile = Array.isArray(rpcResult.data) ? rpcResult.data[0] : rpcResult.data;
-  } else {
-    const directResult = await window.chemquestSupabase
-      .from('profiles')
-      .select('id, full_name, email, role')
-      .eq('id', session.user.id)
-      .maybeSingle();
-    profile = directResult.data;
-    profileError = directResult.error || rpcResult.error;
-  }
+  const { data: profile, error: profileError } = await window.chemquestSupabase
+    .from('profiles')
+    .select('id, full_name, email, role')
+    .eq('id', session.user.id)
+    .maybeSingle();
 
   if (profileError || !profile) {
     const detail = profileError?.message || 'El perfil no existe para esta cuenta.';
@@ -108,6 +99,7 @@ async function showAuthenticatedExperience(session) {
     authStatus.textContent = `Tu cuenta inició sesión, pero no pudimos cargar su perfil. ${detail}`;
     return;
   }
+
   authScreen.hidden = true;
   setLogoutState(true);
 
@@ -141,12 +133,10 @@ async function showAuthenticatedExperience(session) {
     profile.full_name = pendingRegistration.name;
   }
 
-  const workspaceResult = await window.chemquestSupabase.rpc('get_teacher_workspace_owner');
-  const workspaceOwnerId = workspaceResult.error ? null : workspaceResult.data;
-  if (isDefaultTeacher(profile, session) || workspaceOwnerId) {
+  if (isDefaultTeacher(profile, session)) {
     appShell.hidden = true;
     teacherShell.hidden = false;
-    await window.chemquestTeacher.initialize(profile, session, workspaceOwnerId || session.user.id);
+    await window.chemquestTeacher.initialize(profile, session, session.user.id);
     return;
   }
 
