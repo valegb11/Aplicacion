@@ -133,7 +133,7 @@
     $('teacher-module-count').textContent = studyModules.length;
     $('teacher-class-list').innerHTML = studyModules.length ? studyModules.map(item => {
       const lesson = parseLesson(item.description);
-      return `<article class="teacher-content-card"><span>📘</span><div><strong>${escapeHtml(item.title)}</strong><small>Grado ${item.grade} · ${escapeHtml(lesson.summary || 'Sin resumen')}</small></div><b>Guardada</b></article>`;
+      return `<article class="teacher-content-card" data-module-id="${item.id}"><span>📘</span><div><strong>${escapeHtml(item.title)}</strong><small>Grado ${item.grade} · ${escapeHtml(lesson.summary || 'Sin resumen')}</small></div><b>Guardada</b></article>`;
     }).join('') : '<div class="teacher-empty">Todavía no has creado clases.</div>';
   }
 
@@ -385,3 +385,4 @@
   });
   renderQuizDrafts(); window.chemquestTeacher = { shell, initialize, reset };
 })();
+

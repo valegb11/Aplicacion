@@ -86,19 +86,28 @@ function showSignedOut() {
 }
 
 async function showAuthenticatedExperience(session) {
-  const { data: profile, error } = await window.chemquestSupabase
-    .from('profiles')
-    .select('id, full_name, email, role')
-    .eq('id', session.user.id)
-    .single();
-
-  if (error) {
-    console.error('No se pudo cargar el perfil:', error.message);
-    showSignedOut();
-    authStatus.textContent = 'Tu cuenta inició sesión, pero no pudimos cargar su perfil. Verifica la configuración de Supabase.';
-    return;
+  let profile = null;
+  let profileError = null;
+  const rpcResult = await window.chemquestSupabase.rpc('get_my_profile');
+  if (!rpcResult.error) {
+    profile = Array.isArray(rpcResult.data) ? rpcResult.data[0] : rpcResult.data;
+  } else {
+    const directResult = await window.chemquestSupabase
+      .from('profiles')
+      .select('id, full_name, email, role')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    profile = directResult.data;
+    profileError = directResult.error || rpcResult.error;
   }
 
+  if (profileError || !profile) {
+    const detail = profileError?.message || 'El perfil no existe para esta cuenta.';
+    console.error('No se pudo cargar el perfil:', detail);
+    showSignedOut();
+    authStatus.textContent = `Tu cuenta inició sesión, pero no pudimos cargar su perfil. ${detail}`;
+    return;
+  }
   authScreen.hidden = true;
   setLogoutState(true);
 
@@ -294,3 +303,4 @@ studentClassroomCode.addEventListener('input', () => {
 });
 logoutButtons.forEach(button => button.addEventListener('click', signOut));
 initializeAuthentication();
+

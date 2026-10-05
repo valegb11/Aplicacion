@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ChemQuest — Química Inorgánica</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css?v=4">
+<link rel="stylesheet" href="assets/css/styles.css?v=8">
+<link rel="stylesheet" href="assets/css/teacher-content-actions.css?v=1">
+<link rel="stylesheet" href="assets/css/grade-games.css?v=1">
+  <link rel="stylesheet" href="assets/css/grade-games-immersive.css?v=1">
+  <link rel="stylesheet" href="assets/css/balance-drag.css?v=1">
 </head>
 <body>
 
@@ -277,7 +281,7 @@
   <div class="home-body">
     <!-- Grade selector -->
     <div id="student-grade-heading" style="font-family:var(--font-game);font-size:.65rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:1.5rem">Tu grado</div>
-    <div class="grade-selector">
+    <div class="grade-selector" id="grade-selector">
       <button class="grade-btn active" id="btn-8" onclick="selectGrade(8)"
         style="--gb-color:#4ade80;--gb-color-alpha:rgba(74,222,128,.06)">
         <div class="gb-icon">🧫</div>
@@ -293,6 +297,18 @@
         <div class="gb-sub">Química profunda</div>
       </button>
     </div>
+
+    <section class="avatar-home-card" id="student-avatar-zone" hidden>
+      <button class="avatar-home-preview" id="open-avatar-customizer" type="button" aria-label="Personalizar mi avatar">
+        <span class="cq-avatar" id="home-avatar" aria-hidden="true"></span>
+      </button>
+      <div>
+        <span class="avatar-home-kicker">TU PERSONAJE</span>
+        <h2>Tu identidad en ChemQuest</h2>
+        <p>Personalízalo y desbloquea nuevos atuendos con la EXP que ganas aprendiendo.</p>
+        <button class="avatar-customize-btn" id="open-avatar-customizer-secondary" type="button">Personalizar avatar</button>
+      </div>
+    </section>
 
     <!-- XP Bar -->
     <div class="xp-bar-wrap">
@@ -326,6 +342,22 @@
     <div class="map-title" style="margin-top:2rem">🏅 Logros</div>
     <div class="ach-strip" id="ach-strip"></div>
 
+    <div class="map-title" style="margin-top:2rem">🎮 Laboratorio de videojuegos</div>
+    <p class="games-intro">Cuatro misiones de química organizadas por grado. Cada videojuego entrega hasta 25 EXP una vez al día.</p>
+    <div class="grade-games-section">
+      <section class="grade-games-group" data-grade="8"><div class="grade-games-heading"><div><strong>Grado 8</strong><small>Energía y conservación de la materia</small></div><span>2 JUEGOS</span></div><div class="chem-games-grid">
+        <button class="chem-game-card element-game" type="button" data-grade-game="g8-thermo"><span>🌡️</span><div><strong>Termómetro químico</strong><small>Decide si una reacción absorbe o libera energía.</small></div><small class="game-mechanic">Mecánica: análisis energético</small><b class="game-reward">+25 EXP</b></button>
+        <button class="chem-game-card mixture-game" type="button" data-grade-game="g8-conservation"><span>🧩</span><div><strong>Conservación de la materia</strong><small>Balancea ecuaciones sencillas conservando los átomos.</small></div><small class="game-mechanic">Mecánica: rompecabezas</small><b class="game-reward">+25 EXP</b></button>
+      </div></section>
+      <section class="grade-games-group" data-grade="10"><div class="grade-games-heading"><div><strong>Grado 10</strong><small>Estequiometría y balanceo avanzado</small></div><span>2 JUEGOS</span></div><div class="chem-games-grid">
+        <button class="chem-game-card balance-game" type="button" data-grade-game="g10-balance"><span>⚖️</span><div><strong>Balanceador avanzado</strong><small>Resuelve síntesis y combustiones con inventario de átomos.</small></div><small class="game-mechanic">Mecánica: construcción</small><b class="game-reward">+25 EXP</b></button>
+        <button class="chem-game-card ph-game" type="button" data-grade-game="g10-stoich"><span>🏭</span><div><strong>Fábrica estequiométrica</strong><small>Calcula moles, masa y reactivo limitante.</small></div><small class="game-mechanic">Mecánica: cálculo proporcional</small><b class="game-reward">+25 EXP</b></button>
+      </div></section>
+      <section class="grade-games-group free-lab-group"><div class="grade-games-heading"><div><strong>Grados 8 y 10</strong><small>Experimentación abierta con reacciones verificadas</small></div><span>LABORATORIO LIBRE</span></div><div class="chem-games-grid">
+        <a class="chem-game-card element-game" href="virtual-lab.html" style="text-decoration:none"><span>🔬</span><div><strong>Entrar al laboratorio libre</strong><small>Arrastra sustancias, elige el equipo y observa qué reacción ocurre.</small></div><small class="game-mechanic">Vasos · tubos · placas de Petri · 118 elementos</small><b class="game-reward">EXPLORACIÓN ABIERTA</b></a>
+      </div></section>
+    </div>
+
     <div class="map-title" style="margin-top:2rem">🔬 Herramientas</div>
     <button onclick="openPeriodicTable()" style="width:100%;padding:1rem 1.5rem;background:var(--card);border:1.5px solid rgba(139,92,246,.4);border-radius:18px;cursor:pointer;font-family:var(--font-body);font-weight:800;font-size:.95rem;color:var(--text);display:flex;align-items:center;gap:1rem;transition:all .25s;text-align:left;margin-bottom:2rem"
       onmouseover="this.style.borderColor='var(--purple)';this.style.background='rgba(139,92,246,.07)'"
@@ -337,14 +369,6 @@
       </div>
       <span style="margin-left:auto;color:var(--purple);font-size:1.2rem">→</span>
     </button>
-    <a href="virtual-lab.html" style="width:100%;padding:1rem 1.5rem;background:var(--card);border:1.5px solid rgba(34,211,238,.4);border-radius:18px;cursor:pointer;font-family:var(--font-body);font-weight:800;font-size:.95rem;color:var(--text);display:flex;align-items:center;gap:1rem;text-decoration:none;text-align:left;margin-bottom:2rem">
-      <span style="font-size:2rem">🔬</span>
-      <div>
-        <div style="font-family:var(--font-game);font-size:.65rem;color:var(--cyan);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.2rem">Laboratorio virtual</div>
-        <div style="color:var(--dim);font-size:.82rem">Mezcla sustancias, construye fórmulas y utiliza equipo de laboratorio</div>
-      </div>
-      <span style="margin-left:auto;color:var(--cyan);font-size:1.2rem">→</span>
-    </a>
   </div>
 </div>
 
@@ -417,6 +441,15 @@
   <div id="pt-content"></div>
 </div>
 
+<div class="screen" id="screen-chem-game">
+  <div class="lesson-topbar">
+    <button class="back-btn" id="chem-game-back" type="button">← Inicio</button>
+    <div class="lesson-progress-wrap"><div class="lesson-progress-label" id="chem-game-label">LABORATORIO DE JUEGOS</div></div>
+    <div class="teacher-lesson-xp">⚡ +20 EXP</div>
+  </div>
+  <main class="chem-game-stage" id="chem-game-stage"></main>
+</div>
+
 <div class="screen" id="screen-results">
   <div class="results-card" id="results-card"></div>
 </div>
@@ -431,14 +464,38 @@
   <div class="levelup-sub">¡SUBISTE DE NIVEL!</div>
   <button class="levelup-close" onclick="closeLevelUp()">CONTINUAR →</button>
 </div>
+
+<div class="avatar-modal" id="avatar-modal" hidden>
+  <div class="avatar-dialog" role="dialog" aria-modal="true" aria-labelledby="avatar-dialog-title">
+    <button class="avatar-close" id="close-avatar-customizer" type="button" aria-label="Cerrar">×</button>
+    <div class="avatar-dialog-preview"><span class="cq-avatar large" id="customizer-avatar" aria-hidden="true"></span><strong id="avatar-dialog-title">Tu avatar</strong><small id="avatar-unlock-message">Personaliza tu personaje</small></div>
+    <div class="avatar-controls">
+      <div class="avatar-basic-controls">
+        <label>Color de piel<input id="avatar-skin" type="color" value="#b87952"></label>
+        <label>Color del pelo<input id="avatar-hair-color" type="color" value="#24170f"></label>
+        <label>Ojos<select id="avatar-eyes"><option value="round">Redondos</option><option value="happy">Alegres</option><option value="sharp">Decididos</option></select></label>
+        <label>Rostro<select id="avatar-face"><option value="smile">Sonrisa</option><option value="calm">Tranquilo</option><option value="freckles">Pecas</option></select></label>
+      </div>
+      <section class="avatar-catalog" aria-labelledby="avatar-hair-title"><h3 id="avatar-hair-title">Peinados</h3><p>Desbloquéalos acumulando EXP.</p><div class="avatar-choice-grid" id="avatar-hair-options"></div></section>
+      <section class="avatar-catalog" aria-labelledby="avatar-outfit-title"><h3 id="avatar-outfit-title">Camisetas y trajes químicos</h3><p>La EXP no se gasta: cada diseño queda disponible para siempre.</p><div class="avatar-choice-grid outfit-grid" id="avatar-outfit-options"></div></section>
+    </div>
+    <button class="teacher-primary-btn" id="save-avatar" type="button">Guardar personaje</button>
+  </div>
+</div>
 </div>
 
 <!-- Librería que permite que ChemQuest se comunique con Supabase. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="assets/js/supabase-client.js"></script>
-<script src="assets/js/teacher.js?v=7"></script>
-<script src="assets/js/app.js?v=6"></script>
+<script src="assets/js/teacher.js?v=10"></script>
+<script src="assets/js/teacher-content-actions.js?v=1"></script>
+<script src="assets/js/app.js?v=7"></script>
 <script src="assets/js/student-classes.js?v=5"></script>
-<script src="assets/js/auth.js?v=9"></script>
+<script src="assets/js/avatar-games.js?v=3"></script>
+<script src="assets/js/grade-games.js?v=1"></script>
+<script src="assets/js/auth.js?v=10"></script>
+<script src="assets/js/grade-games-immersive.js?v=1"></script>
+<script src="assets/js/balance-drag.js?v=1"></script>
 </body>
 </html>
+
